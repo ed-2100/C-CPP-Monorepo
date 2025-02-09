@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        ".clang-tidy": "yaml",
+        "stdbool.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c"
+    }
+}

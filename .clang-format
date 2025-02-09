@@ -1,0 +1,11 @@
+BasedOnStyle: Google
+Language: Cpp
+Standard: c++20
+ColumnLimit: 80
+BreakConstructorInitializers: BeforeColon
+ReflowComments: false
+BinPackParameters: false
+BinPackArguments: false
+AccessModifierOffset: -2
+SpacesBeforeTrailingComments: 1
+IncludeBlocks: Preserve

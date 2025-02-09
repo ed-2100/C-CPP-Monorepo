@@ -1,0 +1,72 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "Vk Test v1",
+            "program": "${workspaceRoot}/builddir/vk_test_v1/vk_test_v1",
+            "args": [],
+            "env": [],
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "Vk Test v2",
+            "program": "${workspaceRoot}/builddir/vk_test_v2/vk_test_v2",
+            "args": [],
+            "env": [],
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "Vk Test v3",
+            "program": "${workspaceRoot}/builddir/vk_test_v3/vk_test_v3",
+            "args": [],
+            "env": [],
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "Cleanup Stack",
+            "program": "${workspaceRoot}/builddir/cleanup_stack/cleanup_stack",
+            "args": [],
+            "env": [],
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "TicTacToe",
+            "program": "${workspaceRoot}/builddir/tictactoe/tictactoe",
+            "args": [],
+            "env": [],
+            "cwd": "${workspaceRoot}",
+            "runInTerminal": true
+        },
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "Game of Life",
+            "program": "${workspaceRoot}/builddir/game_of_life/game_of_life",
+            "args": [],
+            "env": [],
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "Glowing Dots",
+            "program": "${workspaceRoot}/builddir/glowing_dots/glowing_dots",
+            "args": [],
+            "env": [],
+            "cwd": "${workspaceRoot}"
+        },
+    ]
+}
