@@ -9,10 +9,9 @@
 #include "SwapchainManager.hpp"
 #include "util.hpp"
 
+#include <SDL3/SDL_vulkan.h>
+#include <thread>
 #include <vulkan/vulkan_raii.hpp>
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 
 #include <array>
 #include <cstddef>
@@ -53,7 +52,7 @@ static std::vector<char const*> getInstanceExtensions() {
   decltype(getInstanceExtensions()) extensions;
   uint32_t glfwExtensionCount;
   char const* const* glfwExtensions =
-      glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+      SDL_Vulkan_GetInstanceExtensions(&glfwExtensionCount);
   if (nullptr == glfwExtensions) {
     throw std::runtime_error("Failed to get glfw's required extensions!");
   }
@@ -306,8 +305,8 @@ static vk::raii::ShaderModule createShaderModule(
 }
 
 void run(std::filesystem::path const& executableDirectory) {
-  vk::raii::Context context;
   glfwContext gContext;
+  vk::raii::Context context;
 
   auto window = gContext.createWindow(AppName, vk::Extent2D(500, 500));
 
@@ -421,9 +420,20 @@ void run(std::filesystem::path const& executableDirectory) {
     inFlightFences.push_back(device.createFence(fenceCreateInfo));
   }
 
-  for (uint32_t currentFrame = 0; !glfwWindowShouldClose(window.getHandle());
+  bool done = false;
+  for (uint32_t currentFrame = 0; !done;
        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT) {
-    glfwPollEvents();
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_EVENT_QUIT) {
+        done = true;
+      } else if (event.type == SDL_EVENT_KEY_DOWN) {
+        if (event.key.key == SDLK_ESCAPE) {
+          done = true;
+        }
+      }
+    }
 
     [[maybe_unused]]
     auto _temp0 = device.waitForFences(*inFlightFences[currentFrame],
@@ -477,6 +487,8 @@ void run(std::filesystem::path const& executableDirectory) {
     presentInfo.setImageIndices(imageIndex);
 
     [[maybe_unused]] auto _temp1 = presentQueue.presentKHR(presentInfo);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   device.waitIdle(); // Validation compliance.

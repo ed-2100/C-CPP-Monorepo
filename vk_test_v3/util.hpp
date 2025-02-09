@@ -4,22 +4,22 @@
 
 #include <vulkan/vulkan_raii.hpp>
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_video.h>
 
 struct Window;
 
 struct glfwContext {
   glfwContext() {
-    glfwInit();
-    glfwSetErrorCallback([](int error, char const* msg) {
-      std::cerr << "glfw: "
-                << "(" << error << ") " << msg << std::endl;
-    });
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+      throw std::runtime_error(std::string("Failed to init SDL: ") +
+                               SDL_GetError());
+    }
     std::cout << "@G" << std::endl;
   }
   ~glfwContext() {
-    glfwTerminate();
+    SDL_Quit();
     std::cout << "DG" << std::endl;
   }
 
@@ -37,13 +37,13 @@ struct Window {
   Window() = delete;
   ~Window() noexcept {
     if (handle) {
-      glfwDestroyWindow(handle);
+      SDL_DestroyWindow(handle);
       std::cout << "DW" << std::endl;
     }
   }
 
   Window(glfwContext const& context,
-         GLFWwindow* window,
+         SDL_Window* window,
          std::string const& name,
          vk::Extent2D const& extent)
       : context(context), handle(window), name(name), extent(extent) {}
@@ -56,12 +56,12 @@ struct Window {
 
   vk::raii::SurfaceKHR createSurface(vk::raii::Instance const& instance);
 
-  constexpr GLFWwindow* getHandle() const noexcept { return handle; }
+  constexpr SDL_Window* getHandle() const noexcept { return handle; }
 
 private:
   [[maybe_unused]]
   const glfwContext& context;
-  GLFWwindow* handle = nullptr;
+  SDL_Window* handle = nullptr;
   std::string name;
   vk::Extent2D extent;
 };

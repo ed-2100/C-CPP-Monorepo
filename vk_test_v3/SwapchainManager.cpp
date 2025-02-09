@@ -1,4 +1,5 @@
 #include "SwapchainManager.hpp"
+#include <SDL3/SDL_vulkan.h>
 #include "util.hpp"
 
 #include <map>
@@ -81,13 +82,13 @@ void SwapchainManager::querySurfaceDetails() {
 }
 
 vk::Extent2D SwapchainManager::computeSwapchainExtent(
-    vk::SurfaceCapabilitiesKHR const& surfaceCapabilities, GLFWwindow* window) {
+    vk::SurfaceCapabilitiesKHR const& surfaceCapabilities, SDL_Window* window) {
   if (surfaceCapabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
     return surfaceCapabilities.currentExtent;
   } else {
     int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
+    SDL_GetWindowSize(window, &width, &height);
 
     vk::Extent2D actualExtent(static_cast<uint32_t>(width),
                               static_cast<uint32_t>(height));

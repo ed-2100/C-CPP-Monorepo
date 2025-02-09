@@ -1,9 +1,7 @@
 #pragma once
 
+#include <SDL3/SDL_video.h>
 #include <vulkan/vulkan_raii.hpp>
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 
 enum QueueFamily {
   graphicsFamily,
@@ -16,10 +14,11 @@ using QueueFamilyIndexMap =
 
 struct SwapchainManager {
 public:
+  SwapchainManager() = delete;
   SwapchainManager(vk::raii::PhysicalDevice const& physicalDevice,
                    vk::raii::Device const& device,
                    vk::raii::SurfaceKHR const& surface,
-                   GLFWwindow* window,
+                   SDL_Window* window,
                    QueueFamilyIndexMap const& queueFamilyIndices)
       : physicalDevice(physicalDevice),
         device(device),
@@ -55,14 +54,14 @@ public:
       const std::vector<vk::PresentModeKHR>& availablePresentModes);
   static vk::Extent2D computeSwapchainExtent(
       const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
-      GLFWwindow* window);
+      SDL_Window* window);
 
 private:
   vk::raii::PhysicalDevice const& physicalDevice;
   vk::raii::Device const& device;
   vk::raii::SurfaceKHR const& surface;
   QueueFamilyIndexMap const& queueFamilyIndices;
-  GLFWwindow* window;
+  SDL_Window* window;
 
   vk::SurfaceFormatKHR surfaceFormat;
   vk::SurfaceCapabilitiesKHR surfaceCapabilities;

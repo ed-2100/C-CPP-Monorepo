@@ -17,10 +17,9 @@ add_compile_options(-Wall -Wno-pragma-pack)
 
 # Dependencies
 find_package(SFML COMPONENTS graphics REQUIRED)
-find_package(SDL2 REQUIRED)
 find_package(SDL3 REQUIRED)
 find_package(Vulkan REQUIRED)
-find_package(glfw3 REQUIRED)
+# find_package(glfw3 REQUIRED)
 # find_package(glm REQUIRED)
 
 add_subdirectory(cleanup_stack)

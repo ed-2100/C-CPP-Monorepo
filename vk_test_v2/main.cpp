@@ -13,8 +13,8 @@
 
 #include <vulkan/vulkan_raii.hpp>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_vulkan.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h>
 
 constexpr auto PROGRAM_NAME = "vk_test_v2";
 
@@ -40,17 +40,12 @@ public:
 
 private:
   void initSDL() {
-    if (0 > SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
       throw std::runtime_error(
           std::format("Error initializing SDL: {}", SDL_GetError()));
     }
 
-    window = SDL_CreateWindow("Example",
-                              SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED,
-                              800,
-                              600,
-                              SDL_WINDOW_VULKAN);
+    window = SDL_CreateWindow("Example", 800, 600, SDL_WINDOW_VULKAN);
     if (nullptr == window) {
       throw std::runtime_error(
           std::format("Error creating window: {}", SDL_GetError()));
@@ -89,13 +84,15 @@ private:
 
   std::vector<const char*> getRequiredExtensionNames() {
     unsigned int sdlExtensionCount;
-    SDL_Vulkan_GetInstanceExtensions(window, &sdlExtensionCount, nullptr);
+    char const* const* sdlExtensions =
+        SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
 
     std::vector<const char*> requiredExtensionNames;
 
     requiredExtensionNames.reserve(sdlExtensionCount);
-    SDL_Vulkan_GetInstanceExtensions(
-        window, &sdlExtensionCount, requiredExtensionNames.data());
+    for (auto sdlExtension : std::span(sdlExtensions, sdlExtensionCount)) {
+      requiredExtensionNames.push_back(sdlExtension);
+    }
 
     requiredExtensionNames.push_back(
         vk::KHRPortabilityEnumerationExtensionName);
@@ -185,11 +182,11 @@ private:
 
       SDL_Event event;
       while (SDL_PollEvent(&event)) {
-        if (SDL_EventType::SDL_KEYDOWN == event.type) {
-          if (SDL_Scancode::SDL_SCANCODE_ESCAPE == event.key.keysym.scancode) {
+        if (event.type == SDL_EVENT_KEY_DOWN) {
+          if (SDLK_ESCAPE == event.key.key) {
             running = false;
           }
-        } else if (SDL_EventType::SDL_QUIT == event.type) {
+        } else if (event.type == SDL_EVENT_QUIT) {
           running = false;
         }
       }

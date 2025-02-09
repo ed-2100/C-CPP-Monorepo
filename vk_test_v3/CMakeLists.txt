@@ -11,7 +11,6 @@ foreach(SHADER ${SHADER_FILES})
     list(APPEND SPV_FILES ${SPV_FILE})
 endforeach()
 
-
 file(GLOB SOURCES "*.cpp")
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
@@ -20,5 +19,5 @@ add_custom_target(${SHADER_TARGET} DEPENDS ${SPV_FILES})
 
 add_executable(${MODULE_NAME})
 target_sources(${MODULE_NAME} PRIVATE ${SOURCES})
-target_link_libraries(${MODULE_NAME} PRIVATE vulkan glm glfw) # foo
+target_link_libraries(${MODULE_NAME} PRIVATE vulkan SDL3)
 add_dependencies(${MODULE_NAME} ${SHADER_TARGET})
