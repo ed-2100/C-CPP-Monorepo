@@ -34,6 +34,9 @@ public:
   SwapchainManager(const SwapchainManager&) = delete;
   SwapchainManager& operator=(const SwapchainManager&) = delete;
 
+  SwapchainManager(SwapchainManager&& rhs) = delete;
+  SwapchainManager& operator=(SwapchainManager&& other) = delete;
+
   void createSwapchain(vk::SwapchainKHR oldSwapchain = nullptr);
   void recreateSwapchain();
   void createImageViews();
