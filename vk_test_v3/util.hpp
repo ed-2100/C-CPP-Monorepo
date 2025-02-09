@@ -10,24 +10,24 @@
 
 struct Window;
 
-struct glfwContext {
-  glfwContext() {
+struct SDLContext {
+  SDLContext() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
       throw std::runtime_error(std::string("Failed to init SDL: ") +
                                SDL_GetError());
     }
     std::cout << "@G" << std::endl;
   }
-  ~glfwContext() {
+  ~SDLContext() {
     SDL_Quit();
     std::cout << "DG" << std::endl;
   }
 
-  glfwContext(glfwContext const& rhs) = delete;
-  glfwContext& operator=(glfwContext const& rhs) = delete;
+  SDLContext(SDLContext const& rhs) = delete;
+  SDLContext& operator=(SDLContext const& rhs) = delete;
 
-  glfwContext(glfwContext&& rhs) = delete;
-  glfwContext& operator=(glfwContext&& other) = delete;
+  SDLContext(SDLContext&& rhs) = delete;
+  SDLContext& operator=(SDLContext&& other) = delete;
 
   Window createWindow(std::string const& windowName,
                       vk::Extent2D const& extent) const;
@@ -42,7 +42,7 @@ struct Window {
     }
   }
 
-  Window(glfwContext const& context,
+  Window(SDLContext const& context,
          SDL_Window* window,
          std::string const& name,
          vk::Extent2D const& extent)
@@ -60,7 +60,7 @@ struct Window {
 
 private:
   [[maybe_unused]]
-  const glfwContext& context;
+  const SDLContext& context;
   SDL_Window* handle = nullptr;
   std::string name;
   vk::Extent2D extent;

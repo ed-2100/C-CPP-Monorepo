@@ -11,7 +11,7 @@ vk::raii::SurfaceKHR Window::createSurface(vk::raii::Instance const& instance) {
   return vk::raii::SurfaceKHR(instance, surface);
 }
 
-Window glfwContext::createWindow(std::string const& windowName,
+Window SDLContext::createWindow(std::string const& windowName,
                                  vk::Extent2D const& extent) const {
   SDL_Window* window = SDL_CreateWindow(
       windowName.c_str(), extent.width, extent.height, SDL_WINDOW_VULKAN);

@@ -305,7 +305,7 @@ static vk::raii::ShaderModule createShaderModule(
 }
 
 void run(std::filesystem::path const& executableDirectory) {
-  glfwContext gContext;
+  SDLContext gContext;
   vk::raii::Context context;
 
   auto window = gContext.createWindow(AppName, vk::Extent2D(500, 500));
