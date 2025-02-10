@@ -8,6 +8,7 @@ time ninja -C builddir
 scan-build cmake -B builddir
 scan-build make -C builddir -j $(($(nproc) - 2))
 env SDL_VIDEODRIVER=wayland ./builddir/vk_test_v4/vk_test_v4
+wc -l $(fd --glob '*' --exclude ./builddir/ --type file ./)
 ```
 
 [This](https://github.com/mesonbuild/meson/issues/10590) is my reasoning for not using meson.
