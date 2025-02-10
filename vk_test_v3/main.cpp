@@ -24,15 +24,15 @@
 #include <thread>
 #include <vector>
 
-constexpr std::array validationLayers{
+const std::array validationLayers{
     "VK_LAYER_KHRONOS_validation",
 };
 
-constexpr std::array deviceExtensions{
+const std::array deviceExtensions{
     vk::KHRSwapchainExtensionName,
 };
 
-constexpr char const* AppName = "Hello Triangle";
+char const* const appName = "Hello Triangle";
 
 void run(const std::filesystem::path&);
 
@@ -51,7 +51,7 @@ void run(std::filesystem::path const& executableDirectory) {
   SDLContext gContext;
   vk::raii::Context context;
 
-  auto window = SDLWindow(gContext, AppName, 500, 500);
+  auto window = SDLWindow(gContext, appName, 500, 500);
 
   vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
   debugCreateInfo.messageSeverity =
@@ -66,7 +66,7 @@ void run(std::filesystem::path const& executableDirectory) {
 
   // TODO: Configure createInfo.
   auto instance =
-      createInstance(context, AppName, validationLayers, &debugCreateInfo);
+      createInstance(context, appName, validationLayers, &debugCreateInfo);
 
   auto debugMessenger = instance.createDebugUtilsMessengerEXT(debugCreateInfo);
 
