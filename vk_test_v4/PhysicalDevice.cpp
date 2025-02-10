@@ -3,23 +3,48 @@
 #include <memory>
 #include <ranges>
 #include <unordered_set>
+#include "Instance.hpp"
 
-std::tuple<VkPhysicalDevice, QueueFamilyIndexMap> pickPhysicalDevice(
-    VkInstance instance,
+VkSurfaceCapabilitiesKHR PhysicalDevice::getSurfaceCapabilities(
+    VkSurfaceKHR surface) const {
+  VkSurfaceCapabilitiesKHR surfaceCapabilities;
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+      physicalDevice, surface, &surfaceCapabilities);
+  return surfaceCapabilities;
+}
+
+std::vector<VkSurfaceFormatKHR> PhysicalDevice::getSurfaceFormats(
+    VkSurfaceKHR surface) const {
+  uint32_t surfaceFormatCount;
+  vkGetPhysicalDeviceSurfaceFormatsKHR(
+      physicalDevice, surface, &surfaceFormatCount, nullptr);
+
+  auto surfaceFormats = std::vector<VkSurfaceFormatKHR>(surfaceFormatCount);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(
+      physicalDevice, surface, &surfaceFormatCount, surfaceFormats.data());
+
+  return surfaceFormats;
+}
+
+std::vector<VkPresentModeKHR> PhysicalDevice::getSurfacePresentModes(
+    VkSurfaceKHR surface) const {
+  uint32_t presentModeCount;
+  vkGetPhysicalDeviceSurfacePresentModesKHR(
+      physicalDevice, surface, &presentModeCount, nullptr);
+
+  std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+  vkGetPhysicalDeviceSurfacePresentModesKHR(
+      physicalDevice, surface, &presentModeCount, presentModes.data());
+
+  return presentModes;
+}
+
+std::tuple<PhysicalDevice, QueueFamilyIndexMap> pickPhysicalDevice(
+    Instance const& instance,
     VkSurfaceKHR surface,
     std::span<char const* const> const& deviceExtensions) {
-  uint32_t physicalDeviceCount;
-  vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
-  auto physicalDevices =
-      std::make_unique<VkPhysicalDevice[]>(physicalDeviceCount);
-  auto physicalDevices_span =
-      std::span(physicalDevices.get(), physicalDeviceCount);
-
-  vkEnumeratePhysicalDevices(
-      instance, &physicalDeviceCount, physicalDevices.get());
-
-  for (VkPhysicalDevice physicalDevice : physicalDevices_span) {
+  for (VkPhysicalDevice physicalDevice : instance.enumeratePhysicalDevices()) {
     uint32_t queueFamilyPropertyCount;
     vkGetPhysicalDeviceQueueFamilyProperties(
         physicalDevice, &queueFamilyPropertyCount, nullptr);

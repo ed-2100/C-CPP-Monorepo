@@ -3,6 +3,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "Instance.hpp"
+
 VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
               VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
@@ -59,8 +61,9 @@ vkDestroyDebugUtilsMessengerEXT(VkInstance instance,
   return func(instance, messenger, pAllocator);
 }
 
-DebugMessenger::DebugMessenger(
-    VkInstance instance, VkDebugUtilsMessengerCreateInfoEXT const& createInfo)
+DebugUtilsMessenger::DebugUtilsMessenger(
+    Instance const& instance,
+    VkDebugUtilsMessengerCreateInfoEXT const& createInfo)
     : instance(instance) {
   VkResult result = vkCreateDebugUtilsMessengerEXT(
       instance, &createInfo, nullptr, &messenger);
@@ -70,7 +73,7 @@ DebugMessenger::DebugMessenger(
         std::to_string(result));
   }
 }
-DebugMessenger::~DebugMessenger() {
+DebugUtilsMessenger::~DebugUtilsMessenger() {
   if (messenger) {
     vkDestroyDebugUtilsMessengerEXT(instance, messenger, nullptr);
   }

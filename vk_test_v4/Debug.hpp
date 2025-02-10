@@ -2,6 +2,8 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include "Forward.hpp"
+
 VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -10,20 +12,20 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 
 VkDebugUtilsMessengerCreateInfoEXT createDebugUtilsMessengerCreateInfo();
 
-struct DebugMessenger {
-  DebugMessenger() = delete;
-  DebugMessenger(VkInstance instance,
+struct DebugUtilsMessenger {
+  DebugUtilsMessenger() = delete;
+  DebugUtilsMessenger(Instance const& instance,
                  VkDebugUtilsMessengerCreateInfoEXT const& createInfo);
-  ~DebugMessenger();
+  ~DebugUtilsMessenger();
 
-  DebugMessenger(DebugMessenger const&) = delete;
-  DebugMessenger& operator=(DebugMessenger const&) = delete;
+  DebugUtilsMessenger(DebugUtilsMessenger const&) = delete;
+  DebugUtilsMessenger& operator=(DebugUtilsMessenger const&) = delete;
 
-  DebugMessenger(DebugMessenger const&&) = delete;
-  DebugMessenger& operator=(DebugMessenger const&&) = delete;
+  DebugUtilsMessenger(DebugUtilsMessenger const&&) = delete;
+  DebugUtilsMessenger& operator=(DebugUtilsMessenger const&&) = delete;
 
   constexpr operator VkDebugUtilsMessengerEXT() const { return messenger; }
 
-  VkInstance instance;
+  Instance const& instance;
   VkDebugUtilsMessengerEXT messenger;
 };

@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Instance.hpp"
 #include "Surface.hpp"
+#include "Window.hpp"
 
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_vulkan.h>
@@ -21,16 +23,18 @@ struct SDLContext {
   SDLContext& operator=(SDLContext const&&) = delete;
 };
 
-struct SDLWindow {
+struct SDLWindow final : public Window {
   SDLWindow() = delete;
   SDLWindow(SDLContext& context, char const* name, uint32_t w, uint32_t h);
   ~SDLWindow();
 
-  SDLWindow(SDLWindow const&) = delete;
-  SDLWindow& operator=(SDLWindow const&) = delete;
+  VkExtent2D queryExtent() const {
+    int width, height;
+    SDL_GetWindowSize(handle, &width, &height);
 
-  SDLWindow(SDLWindow const&&) = delete;
-  SDLWindow& operator=(SDLWindow const&&) = delete;
+    return VkExtent2D{static_cast<uint32_t>(width),
+                      static_cast<uint32_t>(height)};
+  }
 
   constexpr operator SDL_Window*() const { return handle; }
 
@@ -39,10 +43,10 @@ struct SDLWindow {
 
 struct SDLSurface final : public Surface {
   SDLSurface() = delete;
-  SDLSurface(SDL_Window* window, VkInstance instance);
-  ~SDLSurface() override final;
+  SDLSurface(SDLWindow const& window, Instance const& instance);
+  ~SDLSurface() override;
 
-  VkSurfaceKHR createSurface(SDL_Window* window, VkInstance instance);
+  VkSurfaceKHR createSurface(SDLWindow const& window, VkInstance instance);
 
-  VkInstance instance;
+  Instance const& instance;
 };

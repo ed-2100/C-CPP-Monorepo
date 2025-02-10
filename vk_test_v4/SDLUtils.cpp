@@ -25,14 +25,14 @@ SDLWindow::~SDLWindow() {
   }
 }
 
-SDLSurface::SDLSurface(SDL_Window* window, VkInstance instance)
+SDLSurface::SDLSurface(SDLWindow const& window, Instance const& instance)
     : Surface(createSurface(window, instance)), instance(instance) {}
 SDLSurface::~SDLSurface() {
   if (surface) {
     SDL_Vulkan_DestroySurface(instance, surface, nullptr);
   }
 }
-VkSurfaceKHR SDLSurface::createSurface(SDL_Window* window,
+VkSurfaceKHR SDLSurface::createSurface(SDLWindow const& window,
                                        VkInstance instance) {
   VkSurfaceKHR surface;
   if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {

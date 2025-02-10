@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "PhysicalDevice.hpp"
+
 Instance::Instance(char const* appName, void const* pNext) {
   VkApplicationInfo appInfo{
       .pApplicationName = appName,
@@ -55,4 +57,18 @@ Instance::~Instance() {
   if (instance != VK_NULL_HANDLE) {
     vkDestroyInstance(instance, nullptr);
   }
+}
+
+std::vector<PhysicalDevice> Instance::enumeratePhysicalDevices() const {
+  uint32_t physicalDeviceCount;
+  vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+
+  std::vector<PhysicalDevice> physicalDevices;
+
+  vkEnumeratePhysicalDevices(
+      instance,
+      &physicalDeviceCount,
+      reinterpret_cast<VkPhysicalDevice*>(physicalDevices.data()));
+  
+  return physicalDevices;
 }

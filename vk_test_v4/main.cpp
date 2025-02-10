@@ -28,7 +28,7 @@ int main() {
 
   Instance instance(pApplicationName, &debugCreateInfo);
 
-  DebugMessenger messenger(instance, debugCreateInfo);
+  DebugUtilsMessenger messenger(instance, debugCreateInfo);
 
   SDLSurface surface{window, instance};
 

@@ -1,0 +1,9 @@
+struct Device;
+struct Instance;
+struct Pipeline;
+struct Swapchain;
+struct SDLContext;
+struct SDLWindow;
+struct SDLSurface;
+struct DebugUtilsManager;
+struct PhysicalDevice;
