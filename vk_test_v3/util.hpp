@@ -30,7 +30,7 @@ struct SDLContext {
   SDLContext& operator=(SDLContext&& other) = delete;
 
   SDLWindow createWindow(std::string const& windowName,
-                      vk::Extent2D const& extent) const;
+                         vk::Extent2D const& extent) const;
 };
 
 struct SDLWindow {
@@ -43,9 +43,9 @@ struct SDLWindow {
   }
 
   SDLWindow(SDLContext const& context,
-         SDL_Window* window,
-         std::string const& name,
-         vk::Extent2D const& extent)
+            SDL_Window* window,
+            std::string const& name,
+            vk::Extent2D const& extent)
       : context(context), handle(window), name(name), extent(extent) {}
 
   SDLWindow(SDLWindow const&) = delete;

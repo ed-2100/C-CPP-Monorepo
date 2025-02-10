@@ -40,12 +40,10 @@ int main() {
 
   Device device{physicalDevice, deviceExtensions, queueFamilyIndexMap.families};
 
-
-
   VkQueue graphicsQueue, presentQueue;
-  vkGetDeviceQueue(device, queueFamilyIndexMap.graphicsFamily, 0, &graphicsQueue);
+  vkGetDeviceQueue(
+      device, queueFamilyIndexMap.graphicsFamily, 0, &graphicsQueue);
   vkGetDeviceQueue(device, queueFamilyIndexMap.presentFamily, 0, &presentQueue);
-
 
   bool done = false;
   while (!done) {
