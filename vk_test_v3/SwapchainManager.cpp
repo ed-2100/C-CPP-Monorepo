@@ -5,7 +5,23 @@
 #include <unordered_map>
 #include <unordered_set>
 
+vk::SurfaceFormatKHR SwapchainManager::chooseSurfaceFormat() const {
+  for (auto const& availableFormat :
+       physicalDevice.getSurfaceFormatsKHR(surface)) {
+    if (availableFormat.format == vk::Format::eB8G8R8A8Srgb &&
+        availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+      return availableFormat;
+    }
+  }
+  throw std::runtime_error("The surface does not support the desired format!");
+}
+
 void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
+  surfaceFormat = chooseSurfaceFormat();
+  auto presentMode = choosePresentMode();
+  auto surfaceCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
+  extent = chooseSwapchainExtent(surfaceCapabilities);
+
   vk::SwapchainCreateInfoKHR createInfo;
   createInfo.surface = surface;
   createInfo.minImageCount = surfaceCapabilities.minImageCount + 1;
@@ -20,7 +36,6 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
   createInfo.oldSwapchain = oldSwapchain;
   createInfo.clipped = true;
 
-  // FIXME: Not sure if this covers all the cases.
   auto uniqueFamilyIndices = queueFamilyIndices.families |
                              std::ranges::to<std::unordered_set>() |
                              std::ranges::to<std::vector>();
@@ -32,22 +47,14 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
   createInfo.setQueueFamilyIndices(uniqueFamilyIndices);
 
   swapchain = device.createSwapchainKHR(createInfo);
+  
   images = swapchain.getImages();
-}
 
-void SwapchainManager::recreateSwapchain() {
-  device.waitIdle();
-  queryDetails();
-  auto oldSwapchain = std::move(swapchain);
-  createSwapchain(oldSwapchain);
-  createImageViews();
-}
-
-void SwapchainManager::createImageViews() {
   imageViews.clear();
   imageViews.reserve(images.size());
   for (auto const& image : images) {
     vk::ImageViewCreateInfo createInfo;
+    
     createInfo.viewType = vk::ImageViewType::e2D;
     createInfo.format = surfaceFormat.format;
     createInfo.components = vk::ComponentSwizzle{};
@@ -59,31 +66,14 @@ void SwapchainManager::createImageViews() {
   }
 }
 
-void SwapchainManager::queryDetails() {
-  surfaceFormat = [&]() {
-    for (auto const& availableFormat :
-         physicalDevice.getSurfaceFormatsKHR(surface)) {
-      if (availableFormat.format == vk::Format::eB8G8R8A8Srgb &&
-          availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
-        return availableFormat;
-      }
-    }
-    throw std::runtime_error(
-        "The surface does not support the desired format!");
-  }();
-
-  auto presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
-  if (presentModes.empty()) throw std::runtime_error("No present modes found!");
-
-  presentMode = choosePresentMode(presentModes);
-
-  surfaceCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
-  extent = computeSwapchainExtent(surfaceCapabilities, window);
+void SwapchainManager::recreateSwapchain() {
+  device.waitIdle();
+  auto oldSwapchain = std::move(swapchain);
+  createSwapchain(oldSwapchain);
 }
 
-vk::Extent2D SwapchainManager::computeSwapchainExtent(
-    vk::SurfaceCapabilitiesKHR const& surfaceCapabilities,
-    Window const& window) {
+vk::Extent2D SwapchainManager::chooseSwapchainExtent(
+    vk::SurfaceCapabilitiesKHR const& surfaceCapabilities) const {
   if (surfaceCapabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
     return surfaceCapabilities.currentExtent;
@@ -101,8 +91,10 @@ vk::Extent2D SwapchainManager::computeSwapchainExtent(
   }
 }
 
-vk::PresentModeKHR SwapchainManager::choosePresentMode(
-    std::vector<vk::PresentModeKHR> const& availablePresentModes) {
+vk::PresentModeKHR SwapchainManager::choosePresentMode() const {
+  auto presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
+  if (presentModes.empty()) throw std::runtime_error("No present modes found!");
+
   const std::unordered_map<vk::PresentModeKHR, uint32_t> presentModePreference{
       {vk::PresentModeKHR::eMailbox, 0},
       {vk::PresentModeKHR::eFifo, 1},
@@ -111,7 +103,7 @@ vk::PresentModeKHR SwapchainManager::choosePresentMode(
   vk::PresentModeKHR presentMode;
 
   uint32_t currentRating = std::numeric_limits<uint32_t>::max();
-  for (const auto& availablePresentMode : availablePresentModes) {
+  for (const auto& availablePresentMode : presentModes) {
     auto candidateKVPairIter = presentModePreference.find(availablePresentMode);
     if (candidateKVPairIter == presentModePreference.cend()) continue;
 

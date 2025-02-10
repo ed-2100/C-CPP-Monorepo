@@ -27,9 +27,7 @@ public:
         surface(surface),
         queueFamilyIndices(queueFamilyIndices),
         window(window) {
-    queryDetails();
     createSwapchain();
-    createImageViews();
   }
 
   SwapchainManager(const SwapchainManager&) = delete;
@@ -40,27 +38,24 @@ public:
 
   void createSwapchain(vk::SwapchainKHR oldSwapchain = nullptr);
   void recreateSwapchain();
-  void createImageViews();
-  void queryDetails();
 
-  static vk::PresentModeKHR choosePresentMode(
-      const std::vector<vk::PresentModeKHR>& availablePresentModes);
-  static vk::Extent2D computeSwapchainExtent(
-      const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
-      Window const& window);
+  vk::SurfaceFormatKHR surfaceFormat;
+  vk::Extent2D extent;
+
+  vk::raii::SwapchainKHR swapchain = nullptr;
+
+  std::vector<vk::Image> images;
+  std::vector<vk::raii::ImageView> imageViews;
+
+private:
+  vk::PresentModeKHR choosePresentMode() const;
+  vk::SurfaceFormatKHR chooseSurfaceFormat() const;
+  vk::Extent2D chooseSwapchainExtent(
+      const vk::SurfaceCapabilitiesKHR& surfaceCapabilities) const;
 
   vk::raii::PhysicalDevice const& physicalDevice;
   vk::raii::Device const& device;
   vk::SurfaceKHR surface;
   QueueFamilyIndexMap const& queueFamilyIndices;
   Window const& window;
-
-  vk::SurfaceFormatKHR surfaceFormat;
-  vk::SurfaceCapabilitiesKHR surfaceCapabilities;
-  vk::PresentModeKHR presentMode;
-  vk::Extent2D extent;
-
-  vk::raii::SwapchainKHR swapchain = nullptr;
-  std::vector<vk::Image> images;
-  std::vector<vk::raii::ImageView> imageViews;
 };
