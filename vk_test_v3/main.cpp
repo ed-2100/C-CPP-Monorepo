@@ -64,7 +64,6 @@ void run(std::filesystem::path const& executableDirectory) {
       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
   debugCreateInfo.pfnUserCallback = debugCallback;
 
-  // TODO: Configure createInfo.
   auto instance =
       createInstance(context, appName, validationLayers, &debugCreateInfo);
 
@@ -72,11 +71,9 @@ void run(std::filesystem::path const& executableDirectory) {
 
   auto surface = SDLSurface(window, instance);
 
-  // TODO: Pick desired `PhysicalDevice` using some metric.
   auto [physicalDevice, queueFamilyIndices] =
       pickPhysicalDevice(instance, surface, deviceExtensions);
 
-  // TODO: Configure createInfo.
   auto device =
       createDevice(physicalDevice, queueFamilyIndices, deviceExtensions);
 
