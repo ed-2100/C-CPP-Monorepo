@@ -1,7 +1,8 @@
 #pragma once
 
-#include <SDL3/SDL_video.h>
 #include <vulkan/vulkan_raii.hpp>
+
+#include <SDL3/SDL_video.h>
 
 #include "Window.hpp"
 
@@ -17,9 +18,9 @@ union QueueFamilyIndexMap {
 struct SwapchainManager {
 public:
   SwapchainManager() = delete;
-  SwapchainManager(vk::raii::PhysicalDevice const& physicalDevice,
-                   vk::raii::Device const& device,
-                   vk::SurfaceKHR const& surface,
+  SwapchainManager(vk::raii::Device const& device,
+                   vk::PhysicalDevice physicalDevice,
+                   vk::SurfaceKHR surface,
                    Window const& window,
                    QueueFamilyIndexMap const& queueFamilyIndices)
       : physicalDevice(physicalDevice),
@@ -53,9 +54,9 @@ private:
   vk::Extent2D chooseSwapchainExtent(
       const vk::SurfaceCapabilitiesKHR& surfaceCapabilities) const;
 
-  vk::raii::PhysicalDevice const& physicalDevice;
+  vk::PhysicalDevice const physicalDevice;
   vk::raii::Device const& device;
-  vk::SurfaceKHR surface;
+  vk::SurfaceKHR const surface;
   QueueFamilyIndexMap const& queueFamilyIndices;
   Window const& window;
 };

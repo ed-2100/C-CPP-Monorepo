@@ -1,0 +1,33 @@
+#include "SwapchainManager.hpp"
+
+#include <SDL3/SDL_vulkan.h>
+#include <filesystem>
+
+std::vector<char const*> getInstanceExtensions();
+VKAPI_ATTR VkBool32 VKAPI_CALL
+debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
+              VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
+              VkDebugUtilsMessengerCallbackDataEXT const* pCallbackData,
+              void* /*pUserData*/);
+vk::raii::Instance createInstance(vk::raii::Context const& context,
+                                  char const* appName,
+                                  std::span<char const* const> validationLayers,
+                                  void* pNext);
+vk::raii::RenderPass createRenderPass(
+    vk::raii::Device const& device, vk::SurfaceFormatKHR const& surfaceFormat);
+vk::raii::Pipeline createGraphicsPipeline(
+    vk::raii::Device const& device,
+    vk::Extent2D const& swapchainExtent,
+    vk::raii::RenderPass const& renderPass,
+    vk::ArrayProxyNoTemporaries<vk::PipelineShaderStageCreateInfo> const&
+        shaderStages);
+std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> pickPhysicalDevice(
+    vk::raii::Instance const& instance,
+    vk::SurfaceKHR const& surface,
+    std::span<char const* const> deviceExtensions);
+vk::raii::Device createDevice(vk::raii::PhysicalDevice const& physicalDevice,
+                              QueueFamilyIndexMap const& queueFamilyIndices,
+                              std::span<char const* const> deviceExtensions);
+std::vector<uint32_t> readFile(std::filesystem::path const& filename);
+vk::raii::ShaderModule createShaderModule(vk::raii::Device const& device,
+                                          std::vector<uint32_t> const& code);
