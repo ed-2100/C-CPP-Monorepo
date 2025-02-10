@@ -1,10 +1,13 @@
 {
-    "files.associations": {
-        ".clang-tidy": "yaml",
-        "stdbool.h": "c",
-        "stdlib.h": "c",
-        "stdio.h": "c"
-    },
-    "editor.detectIndentation": false,
-    "editor.tabSize": 2
+  "files.associations": {
+    ".clang-tidy": "yaml",
+    "stdbool.h": "c",
+    "stdlib.h": "c",
+    "stdio.h": "c"
+  },
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2,
+  "files.exclude": {
+    "**/.git": false,
+  },
 }
