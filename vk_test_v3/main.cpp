@@ -6,11 +6,13 @@
 // I am also still in the process of modularizing this code.
 // `util` and `SwapchainManager` are nicer.
 
+#include "SDLUtils.hpp"
 #include "SwapchainManager.hpp"
-#include "util.hpp"
 
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_vulkan.h>
 #include <thread>
+#include <unordered_set>
 #include <vulkan/vulkan_raii.hpp>
 
 #include <array>
@@ -209,7 +211,7 @@ static vk::raii::Pipeline createGraphicsPipeline(
 }
 
 static auto pickPhysicalDevice(vk::raii::Instance const& instance,
-                               vk::raii::SurfaceKHR const& surface) {
+                               vk::SurfaceKHR const& surface) {
   auto physicalDevices = instance.enumeratePhysicalDevices();
 
   for (auto& physicalDevice : physicalDevices) {
@@ -255,11 +257,11 @@ static auto pickPhysicalDevice(vk::raii::Instance const& instance,
 
 static vk::raii::Device createDevice(
     vk::raii::PhysicalDevice const& physicalDevice,
-    uint32_t graphicsFamily,
-    uint32_t presentFamily) {
+    QueueFamilyIndexMap const& queueFamilyIndices) {
   vk::PhysicalDeviceFeatures deviceFeatures;
 
-  std::set<uint32_t> uniqueQueueFamilyIndices = {graphicsFamily, presentFamily};
+  auto uniqueQueueFamilyIndices =
+      queueFamilyIndices.families | std::ranges::to<std::unordered_set>();
 
   float queuePriority = 1.0;
   std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
@@ -308,7 +310,7 @@ void run(std::filesystem::path const& executableDirectory) {
   SDLContext gContext;
   vk::raii::Context context;
 
-  auto window = gContext.createWindow(AppName, vk::Extent2D(500, 500));
+  auto window = SDLWindow(gContext, AppName, 500, 500);
 
   vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
   debugCreateInfo.messageSeverity =
@@ -326,27 +328,26 @@ void run(std::filesystem::path const& executableDirectory) {
 
   auto debugMessenger = instance.createDebugUtilsMessengerEXT(debugCreateInfo);
 
-  auto surface = window.createSurface(instance);
+  auto surface = SDLSurface(window, instance);
 
   // TODO: Pick desired `PhysicalDevice` using some metric.
   auto [physicalDevice, graphicsFamily, presentFamily] =
       pickPhysicalDevice(instance, surface);
 
+  QueueFamilyIndexMap queueFamilyIndices;
+  queueFamilyIndices.graphicsFamily = graphicsFamily;
+  queueFamilyIndices.presentFamily = presentFamily;
+
   // TODO: Configure createInfo.
-  auto device = createDevice(physicalDevice, graphicsFamily, presentFamily);
+  auto device = createDevice(physicalDevice, queueFamilyIndices);
 
   auto graphicsQueue = device.getQueue(graphicsFamily, 0);
   auto presentQueue = device.getQueue(presentFamily, 0);
 
-  QueueFamilyIndexMap queueFamilyIndices;
-  queueFamilyIndices[QueueFamily::graphicsFamily] = graphicsFamily;
-  queueFamilyIndices[QueueFamily::presentFamily] = presentFamily;
-
   SwapchainManager swapchainManager{
-      physicalDevice, device, surface, window.getHandle(), queueFamilyIndices};
+      physicalDevice, device, surface, window, queueFamilyIndices};
 
-  auto renderPass =
-      createRenderPass(device, swapchainManager.getSurfaceFormat());
+  auto renderPass = createRenderPass(device, swapchainManager.surfaceFormat);
 
   auto vertexShaderCode = readFile(executableDirectory / "shader.vert.spv");
   auto vertexShader = createShaderModule(device, vertexShaderCode);
@@ -370,15 +371,15 @@ void run(std::filesystem::path const& executableDirectory) {
   };
 
   auto graphicsPipeline = createGraphicsPipeline(
-      device, swapchainManager.getExtent(), renderPass, shaderStages);
+      device, swapchainManager.extent, renderPass, shaderStages);
 
   std::vector<vk::raii::Framebuffer> framebuffers;
-  framebuffers.reserve(swapchainManager.getImageViews().size());
-  for (auto const& imageView : swapchainManager.getImageViews()) {
+  framebuffers.reserve(swapchainManager.imageViews.size());
+  for (auto const& imageView : swapchainManager.imageViews) {
     vk::FramebufferCreateInfo createInfo;
     createInfo.renderPass = renderPass;
-    createInfo.width = swapchainManager.getExtent().width;
-    createInfo.height = swapchainManager.getExtent().height;
+    createInfo.width = swapchainManager.extent.width;
+    createInfo.height = swapchainManager.extent.height;
     createInfo.layers = 1;
     createInfo.setAttachments(*imageView);
 
@@ -442,7 +443,7 @@ void run(std::filesystem::path const& executableDirectory) {
     device.resetFences(*inFlightFences[currentFrame]);
 
     vk::AcquireNextImageInfoKHR acquireInfo;
-    acquireInfo.swapchain = swapchainManager.getSwapchain();
+    acquireInfo.swapchain = swapchainManager.swapchain;
     acquireInfo.timeout = std::numeric_limits<uint64_t>::max();
     acquireInfo.semaphore = imageAvailableSemaphores[currentFrame];
     acquireInfo.deviceMask = 0b1;
@@ -460,7 +461,7 @@ void run(std::filesystem::path const& executableDirectory) {
     renderPassBeginInfo.renderPass = renderPass;
     renderPassBeginInfo.framebuffer = framebuffers[imageIndex];
     renderPassBeginInfo.renderArea =
-        vk::Rect2D{{0, 0}, swapchainManager.getExtent()};
+        vk::Rect2D{{0, 0}, swapchainManager.extent};
     renderPassBeginInfo.setClearValues(clearColor);
 
     commandBuffers[currentFrame].beginRenderPass(renderPassBeginInfo,
@@ -481,9 +482,10 @@ void run(std::filesystem::path const& executableDirectory) {
 
     graphicsQueue.submit(submitInfo, inFlightFences[currentFrame]);
 
+    vk::SwapchainKHR temp = swapchainManager.swapchain;
     vk::PresentInfoKHR presentInfo;
     presentInfo.setWaitSemaphores(*renderFinishedSemaphores[currentFrame]);
-    presentInfo.setSwapchains(swapchainManager.getSwapchain());
+    presentInfo.setSwapchains(temp);
     presentInfo.setImageIndices(imageIndex);
 
     [[maybe_unused]] auto _temp1 = presentQueue.presentKHR(presentInfo);

@@ -3,29 +3,31 @@
 #include <SDL3/SDL_video.h>
 #include <vulkan/vulkan_raii.hpp>
 
-enum QueueFamily {
-  graphicsFamily,
-  presentFamily,
-  count, // SAFETY: Must be at the end of the enum.
-};
+#include "Window.hpp"
 
-using QueueFamilyIndexMap =
-    std::array<uint32_t, static_cast<size_t>(QueueFamily::count)>;
+union QueueFamilyIndexMap {
+  struct {
+    uint32_t graphicsFamily;
+    uint32_t presentFamily;
+  };
+
+  uint32_t families[2];
+};
 
 struct SwapchainManager {
 public:
   SwapchainManager() = delete;
   SwapchainManager(vk::raii::PhysicalDevice const& physicalDevice,
                    vk::raii::Device const& device,
-                   vk::raii::SurfaceKHR const& surface,
-                   SDL_Window* window,
+                   vk::SurfaceKHR const& surface,
+                   Window const& window,
                    QueueFamilyIndexMap const& queueFamilyIndices)
       : physicalDevice(physicalDevice),
         device(device),
         surface(surface),
         queueFamilyIndices(queueFamilyIndices),
         window(window) {
-    querySurfaceDetails();
+    queryDetails();
     createSwapchain();
     createImageViews();
   }
@@ -39,34 +41,24 @@ public:
   void createSwapchain(vk::SwapchainKHR oldSwapchain = nullptr);
   void recreateSwapchain();
   void createImageViews();
-  void querySurfaceDetails();
+  void queryDetails();
 
-  constexpr vk::SurfaceFormatKHR const& getSurfaceFormat() const {
-    return surfaceFormat;
-  }
-  constexpr vk::Extent2D const& getExtent() const { return swapchainExtent; }
-  constexpr vk::SwapchainKHR const& getSwapchain() const { return *swapchain; }
-  constexpr std::vector<vk::raii::ImageView> const& getImageViews() const {
-    return imageViews;
-  }
-
-  static std::optional<vk::PresentModeKHR> choosePresentMode(
+  static vk::PresentModeKHR choosePresentMode(
       const std::vector<vk::PresentModeKHR>& availablePresentModes);
   static vk::Extent2D computeSwapchainExtent(
       const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
-      SDL_Window* window);
+      Window const& window);
 
-private:
   vk::raii::PhysicalDevice const& physicalDevice;
   vk::raii::Device const& device;
-  vk::raii::SurfaceKHR const& surface;
+  vk::SurfaceKHR surface;
   QueueFamilyIndexMap const& queueFamilyIndices;
-  SDL_Window* window;
+  Window const& window;
 
   vk::SurfaceFormatKHR surfaceFormat;
   vk::SurfaceCapabilitiesKHR surfaceCapabilities;
   vk::PresentModeKHR presentMode;
-  vk::Extent2D swapchainExtent;
+  vk::Extent2D extent;
 
   vk::raii::SwapchainKHR swapchain = nullptr;
   std::vector<vk::Image> images;

@@ -1,8 +1,9 @@
 #include "SwapchainManager.hpp"
 #include <SDL3/SDL_vulkan.h>
-#include "util.hpp"
 
-#include <map>
+#include <ranges>
+#include <unordered_map>
+#include <unordered_set>
 
 void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
   vk::SwapchainCreateInfoKHR createInfo;
@@ -10,7 +11,7 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
   createInfo.minImageCount = surfaceCapabilities.minImageCount + 1;
   createInfo.imageFormat = surfaceFormat.format;
   createInfo.imageColorSpace = surfaceFormat.colorSpace;
-  createInfo.imageExtent = swapchainExtent;
+  createInfo.imageExtent = extent;
   createInfo.imageArrayLayers = 1;
   createInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
   createInfo.preTransform = surfaceCapabilities.currentTransform;
@@ -20,15 +21,15 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
   createInfo.clipped = true;
 
   // FIXME: Not sure if this covers all the cases.
-  const uint32_t tempQueueFamilyIndices[] = {
-      queueFamilyIndices[QueueFamily::graphicsFamily],
-      queueFamilyIndices[QueueFamily::presentFamily]};
-  if (tempQueueFamilyIndices[0] != tempQueueFamilyIndices[1]) {
+  auto uniqueFamilyIndices = queueFamilyIndices.families |
+                             std::ranges::to<std::unordered_set>() |
+                             std::ranges::to<std::vector>();
+  if (queueFamilyIndices.graphicsFamily != queueFamilyIndices.presentFamily) {
     createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-    createInfo.setQueueFamilyIndices(queueFamilyIndices);
   } else {
     createInfo.imageSharingMode = vk::SharingMode::eExclusive;
   }
+  createInfo.setQueueFamilyIndices(uniqueFamilyIndices);
 
   swapchain = device.createSwapchainKHR(createInfo);
   images = swapchain.getImages();
@@ -36,7 +37,7 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
 
 void SwapchainManager::recreateSwapchain() {
   device.waitIdle();
-  querySurfaceDetails();
+  queryDetails();
   auto oldSwapchain = std::move(swapchain);
   createSwapchain(oldSwapchain);
   createImageViews();
@@ -58,7 +59,7 @@ void SwapchainManager::createImageViews() {
   }
 }
 
-void SwapchainManager::querySurfaceDetails() {
+void SwapchainManager::queryDetails() {
   surfaceFormat = [&]() {
     for (auto const& availableFormat :
          physicalDevice.getSurfaceFormatsKHR(surface)) {
@@ -74,24 +75,20 @@ void SwapchainManager::querySurfaceDetails() {
   auto presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
   if (presentModes.empty()) throw std::runtime_error("No present modes found!");
 
-  presentMode = expect(choosePresentMode(presentModes),
-                       "Failed to choose a desired present mode!");
+  presentMode = choosePresentMode(presentModes);
 
   surfaceCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
-  swapchainExtent = computeSwapchainExtent(surfaceCapabilities, window);
+  extent = computeSwapchainExtent(surfaceCapabilities, window);
 }
 
 vk::Extent2D SwapchainManager::computeSwapchainExtent(
-    vk::SurfaceCapabilitiesKHR const& surfaceCapabilities, SDL_Window* window) {
+    vk::SurfaceCapabilitiesKHR const& surfaceCapabilities,
+    Window const& window) {
   if (surfaceCapabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
     return surfaceCapabilities.currentExtent;
   } else {
-    int width, height;
-    SDL_GetWindowSize(window, &width, &height);
-
-    vk::Extent2D actualExtent(static_cast<uint32_t>(width),
-                              static_cast<uint32_t>(height));
+    vk::Extent2D actualExtent = window.queryExtent();
 
     actualExtent.width = std::clamp(actualExtent.width,
                                     surfaceCapabilities.minImageExtent.width,
@@ -104,9 +101,9 @@ vk::Extent2D SwapchainManager::computeSwapchainExtent(
   }
 }
 
-std::optional<vk::PresentModeKHR> SwapchainManager::choosePresentMode(
+vk::PresentModeKHR SwapchainManager::choosePresentMode(
     std::vector<vk::PresentModeKHR> const& availablePresentModes) {
-  const std::map<vk::PresentModeKHR, uint32_t> presentModePreference{
+  const std::unordered_map<vk::PresentModeKHR, uint32_t> presentModePreference{
       {vk::PresentModeKHR::eMailbox, 0},
       {vk::PresentModeKHR::eFifo, 1},
   };
@@ -125,7 +122,9 @@ std::optional<vk::PresentModeKHR> SwapchainManager::choosePresentMode(
     }
   }
 
-  if (currentRating != std::numeric_limits<uint32_t>::max()) return presentMode;
+  if (currentRating == std::numeric_limits<uint32_t>::max()) {
+    throw std::runtime_error("Failed to choose a desired present mode!");
+  }
 
-  return std::nullopt;
+  return presentMode;
 }
