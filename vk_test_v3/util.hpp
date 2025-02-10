@@ -8,7 +8,7 @@
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_video.h>
 
-struct Window;
+struct SDLWindow;
 
 struct SDLContext {
   SDLContext() {
@@ -29,30 +29,30 @@ struct SDLContext {
   SDLContext(SDLContext&& rhs) = delete;
   SDLContext& operator=(SDLContext&& other) = delete;
 
-  Window createWindow(std::string const& windowName,
+  SDLWindow createWindow(std::string const& windowName,
                       vk::Extent2D const& extent) const;
 };
 
-struct Window {
-  Window() = delete;
-  ~Window() noexcept {
+struct SDLWindow {
+  SDLWindow() = delete;
+  ~SDLWindow() noexcept {
     if (handle) {
       SDL_DestroyWindow(handle);
       std::cout << "DW" << std::endl;
     }
   }
 
-  Window(SDLContext const& context,
+  SDLWindow(SDLContext const& context,
          SDL_Window* window,
          std::string const& name,
          vk::Extent2D const& extent)
       : context(context), handle(window), name(name), extent(extent) {}
 
-  Window(Window const&) = delete;
-  Window& operator=(Window const&) = delete;
+  SDLWindow(SDLWindow const&) = delete;
+  SDLWindow& operator=(SDLWindow const&) = delete;
 
-  Window(Window&& rhs) = delete;
-  Window& operator=(Window&& rhs) = delete;
+  SDLWindow(SDLWindow&& rhs) = delete;
+  SDLWindow& operator=(SDLWindow&& rhs) = delete;
 
   vk::raii::SurfaceKHR createSurface(vk::raii::Instance const& instance);
 
