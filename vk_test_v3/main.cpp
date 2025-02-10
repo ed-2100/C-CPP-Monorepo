@@ -247,9 +247,10 @@ static auto pickPhysicalDevice(vk::raii::Instance const& instance,
     }
     if (!extensionChecklist.empty()) continue;
 
-    return std::make_tuple(std::move(physicalDevice),
-                           graphicsFamily.value(),
-                           presentFamily.value());
+    return std::make_tuple(
+        std::move(physicalDevice),
+        QueueFamilyIndexMap{.graphicsFamily = graphicsFamily.value(),
+                            .presentFamily = presentFamily.value()});
   }
 
   throw std::runtime_error("No suitable GPU.");
@@ -331,18 +332,14 @@ void run(std::filesystem::path const& executableDirectory) {
   auto surface = SDLSurface(window, instance);
 
   // TODO: Pick desired `PhysicalDevice` using some metric.
-  auto [physicalDevice, graphicsFamily, presentFamily] =
+  auto [physicalDevice, queueFamilyIndices] =
       pickPhysicalDevice(instance, surface);
-
-  QueueFamilyIndexMap queueFamilyIndices;
-  queueFamilyIndices.graphicsFamily = graphicsFamily;
-  queueFamilyIndices.presentFamily = presentFamily;
 
   // TODO: Configure createInfo.
   auto device = createDevice(physicalDevice, queueFamilyIndices);
 
-  auto graphicsQueue = device.getQueue(graphicsFamily, 0);
-  auto presentQueue = device.getQueue(presentFamily, 0);
+  auto graphicsQueue = device.getQueue(queueFamilyIndices.graphicsFamily, 0);
+  auto presentQueue = device.getQueue(queueFamilyIndices.presentFamily, 0);
 
   SwapchainManager swapchainManager{
       physicalDevice, device, surface, window, queueFamilyIndices};
@@ -389,7 +386,7 @@ void run(std::filesystem::path const& executableDirectory) {
   vk::CommandPoolCreateInfo commandPoolCreateInfo;
   commandPoolCreateInfo.flags =
       vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
-  commandPoolCreateInfo.queueFamilyIndex = graphicsFamily;
+  commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
 
   auto commandPool = device.createCommandPool(commandPoolCreateInfo);
 
