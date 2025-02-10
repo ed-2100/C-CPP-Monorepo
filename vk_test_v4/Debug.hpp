@@ -15,7 +15,7 @@ VkDebugUtilsMessengerCreateInfoEXT createDebugUtilsMessengerCreateInfo();
 struct DebugUtilsMessenger {
   DebugUtilsMessenger() = delete;
   DebugUtilsMessenger(Instance const& instance,
-                 VkDebugUtilsMessengerCreateInfoEXT const& createInfo);
+                      VkDebugUtilsMessengerCreateInfoEXT const& createInfo);
   ~DebugUtilsMessenger();
 
   DebugUtilsMessenger(DebugUtilsMessenger const&) = delete;

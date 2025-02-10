@@ -48,14 +48,14 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
   createInfo.setQueueFamilyIndices(uniqueFamilyIndices);
 
   swapchain = device.createSwapchainKHR(createInfo);
-  
+
   images = swapchain.getImages();
 
   imageViews.clear();
   imageViews.reserve(images.size());
   for (auto const& image : images) {
     vk::ImageViewCreateInfo createInfo;
-    
+
     createInfo.viewType = vk::ImageViewType::e2D;
     createInfo.format = surfaceFormat.format;
     createInfo.components = vk::ComponentSwizzle{};

@@ -25,7 +25,8 @@ SDLWindow::~SDLWindow() {
   }
 }
 
-SDLSurface::SDLSurface(SDLWindow const& window, vk::raii::Instance const& instance)
+SDLSurface::SDLSurface(SDLWindow const& window,
+                       vk::raii::Instance const& instance)
     : Surface(createSurface(window, instance)), instance(instance) {}
 SDLSurface::~SDLSurface() {
   if (surface) {

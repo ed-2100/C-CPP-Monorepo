@@ -69,6 +69,6 @@ std::vector<PhysicalDevice> Instance::enumeratePhysicalDevices() const {
       instance,
       &physicalDeviceCount,
       reinterpret_cast<VkPhysicalDevice*>(physicalDevices.data()));
-  
+
   return physicalDevices;
 }

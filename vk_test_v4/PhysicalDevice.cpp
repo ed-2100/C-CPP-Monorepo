@@ -43,7 +43,6 @@ std::tuple<PhysicalDevice, QueueFamilyIndexMap> pickPhysicalDevice(
     Instance const& instance,
     VkSurfaceKHR surface,
     std::span<char const* const> const& deviceExtensions) {
-
   for (VkPhysicalDevice physicalDevice : instance.enumeratePhysicalDevices()) {
     uint32_t queueFamilyPropertyCount;
     vkGetPhysicalDeviceQueueFamilyProperties(
