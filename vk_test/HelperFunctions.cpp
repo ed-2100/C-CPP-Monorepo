@@ -28,7 +28,8 @@ vk::raii::Instance createInstance(SDLContext const& sdlContext,
   appInfo.apiVersion = VK_API_VERSION_1_3;
 
   auto sdlExtensions = sdlContext.getInstanceExtensions();
-  std::vector<char const*> instanceExtensions(sdlExtensions.cbegin(), sdlExtensions.cend());
+  std::vector<char const*> instanceExtensions(sdlExtensions.cbegin(),
+                                              sdlExtensions.cend());
   instanceExtensions.push_back("VK_EXT_debug_utils");
   instanceExtensions.push_back("VK_KHR_portability_enumeration");
 

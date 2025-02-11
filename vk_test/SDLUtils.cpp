@@ -11,9 +11,7 @@ SDLContext::SDLContext() {
                              SDL_GetError());
   }
 }
-SDLContext::~SDLContext() {
-  SDL_Quit();
-}
+SDLContext::~SDLContext() { SDL_Quit(); }
 std::shared_ptr<SDLContext> SDLContext::getInstance() {
   static std::weak_ptr<SDLContext> weakInstance;
 
