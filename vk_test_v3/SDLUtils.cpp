@@ -12,10 +12,28 @@ SDLContext::SDLContext() {
   }
 }
 SDLContext::~SDLContext() { SDL_Quit(); }
+std::shared_ptr<SDLContext> SDLContext::getInstance() {
+  static std::weak_ptr<SDLContext> weakInstance;
 
-SDLWindow::SDLWindow(char const* name,
-                     uint32_t w,
-                     uint32_t h) {
+  auto sharedInstance = weakInstance.lock();
+  if (!sharedInstance) {
+    sharedInstance = std::make_shared<SDLContext>();
+    weakInstance = sharedInstance;
+  }
+
+  return sharedInstance;
+}
+std::span<char const* const> SDLContext::getInstanceExtensions() {
+  uint32_t sdlExtensionCount;
+  char const* const* sdlExtensions =
+      SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+  if (nullptr == sdlExtensions) {
+    throw std::runtime_error("Failed to get SDL's required extensions!");
+  }
+  return std::span(sdlExtensions, sdlExtensionCount);
+}
+
+SDLWindow::SDLWindow(char const* name, uint32_t w, uint32_t h) {
   handle = SDL_CreateWindow(name, w, h, SDL_WINDOW_VULKAN);
 }
 SDLWindow::~SDLWindow() {

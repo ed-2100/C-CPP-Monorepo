@@ -19,14 +19,22 @@ struct SDLContext {
   SDLContext(SDLContext const&) = delete;
   SDLContext& operator=(SDLContext const&) = delete;
 
-  SDLContext(SDLContext const&&) = delete;
-  SDLContext& operator=(SDLContext const&&) = delete;
+  SDLContext(SDLContext&&) = default;
+  SDLContext& operator=(SDLContext&&) = default;
+
+  static std::shared_ptr<SDLContext> getInstance();
+
+  // Not const, because SDL must be initialized in order to call it.
+  std::span<char const* const> getInstanceExtensions();
 };
 
 struct SDLWindow final : public Window {
   SDLWindow() = delete;
   SDLWindow(char const* name, uint32_t w, uint32_t h);
   ~SDLWindow();
+
+  SDLWindow(SDLWindow&) = delete;
+  SDLWindow& operator=(SDLWindow&) = delete;
 
   SDLWindow(SDLWindow&&) = default;
   SDLWindow& operator=(SDLWindow&&) = default;
@@ -48,6 +56,9 @@ struct SDLSurface final : public Surface {
   SDLSurface() = delete;
   SDLSurface(SDLWindow const& window, vk::Instance instance);
   ~SDLSurface() override;
+
+  SDLSurface(SDLSurface&) = delete;
+  SDLSurface& operator=(SDLSurface&) = delete;
 
   SDLSurface(SDLSurface&& rhs) noexcept
       : Surface(std::move(rhs)), instance(std::exchange(rhs.instance, {})) {}

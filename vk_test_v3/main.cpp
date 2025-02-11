@@ -48,7 +48,8 @@ int main(int /*argc*/, char const* const* argv) {
 }
 
 void run(std::filesystem::path const& executableDirectory) {
-  SDLContext gContext;
+  auto sdlContext = SDLContext::getInstance();
+
   vk::raii::Context context;
 
   auto window = SDLWindow(appName, 500, 500);
