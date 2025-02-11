@@ -7,13 +7,13 @@
 
 std::vector<char const*> getInstanceExtensions() {
   decltype(getInstanceExtensions()) extensions;
-  uint32_t glfwExtensionCount;
-  char const* const* glfwExtensions =
-      SDL_Vulkan_GetInstanceExtensions(&glfwExtensionCount);
-  if (nullptr == glfwExtensions) {
+  uint32_t sdlExtensionCount;
+  char const* const* sdlExtensions =
+      SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+  if (nullptr == sdlExtensions) {
     throw std::runtime_error("Failed to get glfw's required extensions!");
   }
-  for (auto extension : std::span(glfwExtensions, glfwExtensionCount)) {
+  for (auto extension : std::span(sdlExtensions, sdlExtensionCount)) {
     extensions.push_back(extension);
   }
   extensions.push_back("VK_EXT_debug_utils");
