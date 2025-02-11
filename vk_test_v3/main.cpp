@@ -65,8 +65,8 @@ void run(std::filesystem::path const& executableDirectory) {
       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
   debugCreateInfo.pfnUserCallback = debugCallback;
 
-  auto instance =
-      createInstance(context, appName, validationLayers, &debugCreateInfo);
+  auto instance = createInstance(
+      *sdlContext, context, appName, validationLayers, &debugCreateInfo);
 
   auto debugMessenger = instance.createDebugUtilsMessengerEXT(debugCreateInfo);
 

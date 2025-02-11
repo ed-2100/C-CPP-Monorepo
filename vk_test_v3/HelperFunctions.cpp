@@ -5,22 +5,6 @@
 #include <ranges>
 #include <unordered_set>
 
-std::vector<char const*> getInstanceExtensions() {
-  decltype(getInstanceExtensions()) extensions;
-  uint32_t sdlExtensionCount;
-  char const* const* sdlExtensions =
-      SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
-  if (nullptr == sdlExtensions) {
-    throw std::runtime_error("Failed to get glfw's required extensions!");
-  }
-  for (auto extension : std::span(sdlExtensions, sdlExtensionCount)) {
-    extensions.push_back(extension);
-  }
-  extensions.push_back("VK_EXT_debug_utils");
-  extensions.push_back("VK_KHR_portability_enumeration");
-  return extensions;
-}
-
 VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
               VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
@@ -31,7 +15,8 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
   return VK_FALSE;
 }
 
-vk::raii::Instance createInstance(vk::raii::Context const& context,
+vk::raii::Instance createInstance(SDLContext const& sdlContext,
+                                  vk::raii::Context const& context,
                                   char const* appName,
                                   std::span<char const* const> validationLayers,
                                   void* pNext) {
@@ -42,7 +27,10 @@ vk::raii::Instance createInstance(vk::raii::Context const& context,
   appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 0);
   appInfo.apiVersion = VK_API_VERSION_1_3;
 
-  auto instanceExtensions = getInstanceExtensions();
+  auto sdlExtensions = sdlContext.getInstanceExtensions();
+  std::vector<char const*> instanceExtensions(sdlExtensions.cbegin(), sdlExtensions.cend());
+  instanceExtensions.push_back("VK_EXT_debug_utils");
+  instanceExtensions.push_back("VK_KHR_portability_enumeration");
 
   vk::InstanceCreateInfo createInfo;
   createInfo.pApplicationInfo = &appInfo;

@@ -1,15 +1,16 @@
+#include "SDLUtils.hpp"
 #include "SwapchainManager.hpp"
 
 #include <SDL3/SDL_vulkan.h>
 #include <filesystem>
 
-std::vector<char const*> getInstanceExtensions();
 VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
               VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
               VkDebugUtilsMessengerCallbackDataEXT const* pCallbackData,
               void* /*pUserData*/);
-vk::raii::Instance createInstance(vk::raii::Context const& context,
+vk::raii::Instance createInstance(SDLContext const& sdlContext,
+                                  vk::raii::Context const& context,
                                   char const* appName,
                                   std::span<char const* const> validationLayers,
                                   void* pNext);

@@ -15,8 +15,16 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 # set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_options(-Wall -Wno-pragma-pack)
 
-# Dependencies
-find_package(SFML COMPONENTS graphics REQUIRED)
+include(FetchContent)
+
+# Fetch SFML from GitHub, because v3.0 just released and I haven't ported the code yet.
+FetchContent_Declare(
+    SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 2.6.2
+)
+FetchContent_MakeAvailable(SFML)
+
 find_package(SDL3 REQUIRED)
 find_package(Vulkan REQUIRED)
 # find_package(glfw3 REQUIRED)
