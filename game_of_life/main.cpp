@@ -12,20 +12,19 @@ constexpr size_t height = 1000;
 
 int main(int /*argc*/, const char** /*argv*/) {
   sf::RenderWindow window;
-  window.create(sf::VideoMode(width, height),
+  window.create(sf::VideoMode({width, height}),
                 "GOL",
                 sf::Style::Titlebar | sf::Style::Close);
   // window.setFramerateLimit(100);
 
-  sf::Texture texture;
-  texture.create(width, height);
+  sf::Texture texture({width, height});
 
   sf::Sprite sprite(texture);
 
-  auto pixels = std::make_unique<sf::Uint8[][width][4]>(height);
+  auto pixels = std::make_unique<uint8_t[][width][4]>(height);
 
-  std::fill(reinterpret_cast<sf::Uint8*>(pixels.get()),
-            reinterpret_cast<sf::Uint8*>(pixels.get()) + height * width * 4,
+  std::fill(reinterpret_cast<uint8_t*>(pixels.get()),
+            reinterpret_cast<uint8_t*>(pixels.get()) + height * width * 4,
             0);
 
   auto past_state = std::make_unique<bool[][width]>(height);
@@ -44,12 +43,12 @@ int main(int /*argc*/, const char** /*argv*/) {
 
   auto last_end_time = starttime;
   while (window.isOpen()) {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed) {
+    while (auto event = window.pollEvent()) {
+      if (event->is<sf::Event::Closed>()) {
         window.close();
-      } else if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::Key::Escape) {
+      } else if (event->is<sf::Event::KeyPressed>()) {
+        if (event->getIf<sf::Event::KeyPressed>()->code ==
+            sf::Keyboard::Key::Escape) {
           window.close();
         }
       }
@@ -82,7 +81,7 @@ int main(int /*argc*/, const char** /*argv*/) {
       }
     }
 
-    texture.update(reinterpret_cast<sf::Uint8*>(pixels.get()));
+    texture.update(reinterpret_cast<uint8_t*>(pixels.get()));
     window.clear(sf::Color(255, 255, 255, 255));
     window.draw(sprite);
     window.display();

@@ -17,11 +17,11 @@ add_compile_options(-Wall -Wno-pragma-pack)
 
 include(FetchContent)
 
-# Fetch SFML from GitHub, because v3.0 just released and I haven't ported the code yet.
+# Fetch SFML from GitHub.
 FetchContent_Declare(
     SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 2.6.2
+    GIT_TAG 3.0.0
 )
 FetchContent_MakeAvailable(SFML)
 
