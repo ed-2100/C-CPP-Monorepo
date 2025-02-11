@@ -23,7 +23,7 @@ std::shared_ptr<SDLContext> SDLContext::getInstance() {
 
   return sharedInstance;
 }
-std::span<char const* const> SDLContext::getInstanceExtensions() {
+std::span<char const* const> SDLContext::getInstanceExtensions() const {
   uint32_t sdlExtensionCount;
   char const* const* sdlExtensions =
       SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);

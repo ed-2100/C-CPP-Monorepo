@@ -24,8 +24,7 @@ struct SDLContext {
 
   static std::shared_ptr<SDLContext> getInstance();
 
-  // Not const, because SDL must be initialized in order to call it.
-  std::span<char const* const> getInstanceExtensions();
+  std::span<char const* const> getInstanceExtensions() const;
 };
 
 struct SDLWindow final : public Window {
