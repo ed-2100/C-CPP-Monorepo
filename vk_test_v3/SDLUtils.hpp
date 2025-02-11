@@ -46,7 +46,7 @@ struct SDLWindow final : public Window {
 
 struct SDLSurface final : public Surface {
   SDLSurface() = delete;
-  SDLSurface(SDLWindow const& window, vk::raii::Instance const& instance);
+  SDLSurface(SDLWindow const& window, vk::Instance instance);
   ~SDLSurface() override;
 
   SDLSurface(SDLSurface&& rhs) noexcept
