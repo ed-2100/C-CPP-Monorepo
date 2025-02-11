@@ -161,18 +161,6 @@ void run(std::filesystem::path const& executableDirectory) {
   bool done = false;
   for (uint32_t currentFrame = 0; !done;
        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT) {
-    SDL_Event event;
-
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_EVENT_QUIT) {
-        done = true;
-      } else if (event.type == SDL_EVENT_KEY_DOWN) {
-        if (event.key.key == SDLK_ESCAPE) {
-          done = true;
-        }
-      }
-    }
-
     [[maybe_unused]]
     auto _temp0 = device.waitForFences(*inFlightFences[currentFrame],
                                        true,
@@ -227,6 +215,18 @@ void run(std::filesystem::path const& executableDirectory) {
     [[maybe_unused]] auto _temp1 = presentQueue.presentKHR(presentInfo);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_EVENT_QUIT) {
+        done = true;
+      } else if (event.type == SDL_EVENT_KEY_DOWN) {
+        if (event.key.key == SDLK_ESCAPE) {
+          done = true;
+        }
+      }
+    }
   }
 
   device.waitIdle(); // Validation compliance.
