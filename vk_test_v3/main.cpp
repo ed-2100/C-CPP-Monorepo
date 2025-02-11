@@ -1,10 +1,7 @@
 // **INCOMPLETE PROJECT**
 
-// I should probably be using SDL, but I wanted to
-// try my best to power through the tutorial this time.
-
-// I am also still in the process of modularizing this code.
-// `util` and `SwapchainManager` are nicer.
+// I am still in the process of modularizing this code.
+// `SDLUtils.{hpp,cpp}` and `SwapchainManager.{hpp,cpp}` are nicer.
 
 #include "HelperFunctions.hpp"
 #include "SDLUtils.hpp"
