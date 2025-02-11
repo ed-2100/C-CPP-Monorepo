@@ -28,6 +28,9 @@ struct SDLWindow final : public Window {
   SDLWindow(SDLContext& context, char const* name, uint32_t w, uint32_t h);
   ~SDLWindow();
 
+  SDLWindow(SDLWindow&&) = default;
+  SDLWindow& operator=(SDLWindow&&) = default;
+
   VkExtent2D queryExtent() const {
     int width, height;
     SDL_GetWindowSize(handle, &width, &height);
@@ -46,7 +49,17 @@ struct SDLSurface final : public Surface {
   SDLSurface(SDLWindow const& window, vk::raii::Instance const& instance);
   ~SDLSurface() override;
 
+  SDLSurface(SDLSurface&& rhs) noexcept
+      : Surface(std::move(rhs)), instance(std::exchange(rhs.instance, {})) {}
+  SDLSurface& operator=(SDLSurface&& rhs) noexcept {
+    if (this != &rhs) {
+      Surface::operator=(std::move(rhs));
+      std::swap(instance, rhs.instance);
+    }
+    return *this;
+  }
+
   VkSurfaceKHR createSurface(SDLWindow const& window, vk::Instance instance);
 
-  vk::raii::Instance const& instance;
+  vk::Instance instance;
 };

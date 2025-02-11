@@ -8,8 +8,13 @@ struct Surface {
   Surface(Surface const&) = delete;
   Surface& operator=(Surface const&) = delete;
 
-  Surface(Surface const&&) = delete;
-  Surface& operator=(Surface const&&) = delete;
+  Surface(Surface&& rhs) noexcept : surface(std::exchange(rhs.surface, {})) {};
+  Surface& operator=(Surface&& rhs) noexcept {
+    if (this != &rhs) {
+      std::swap(surface, rhs.surface);
+    }
+    return *this;
+  }
 
   constexpr operator vk::SurfaceKHR() const { return surface; }
 
