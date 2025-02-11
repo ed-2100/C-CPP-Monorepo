@@ -25,7 +25,7 @@ struct SDLContext {
 
 struct SDLWindow final : public Window {
   SDLWindow() = delete;
-  SDLWindow(SDLContext& context, char const* name, uint32_t w, uint32_t h);
+  SDLWindow(char const* name, uint32_t w, uint32_t h);
   ~SDLWindow();
 
   SDLWindow(SDLWindow&&) = default;

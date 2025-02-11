@@ -51,7 +51,7 @@ void run(std::filesystem::path const& executableDirectory) {
   SDLContext gContext;
   vk::raii::Context context;
 
-  auto window = SDLWindow(gContext, appName, 500, 500);
+  auto window = SDLWindow(appName, 500, 500);
 
   vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
   debugCreateInfo.messageSeverity =

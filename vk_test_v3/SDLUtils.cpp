@@ -13,8 +13,7 @@ SDLContext::SDLContext() {
 }
 SDLContext::~SDLContext() { SDL_Quit(); }
 
-SDLWindow::SDLWindow(SDLContext& context,
-                     char const* name,
+SDLWindow::SDLWindow(char const* name,
                      uint32_t w,
                      uint32_t h) {
   handle = SDL_CreateWindow(name, w, h, SDL_WINDOW_VULKAN);
