@@ -10,6 +10,7 @@ scan-build make -C builddir -j $(($(nproc) - 2))
 env SDL_VIDEODRIVER=wayland ./builddir/vk_test_v4/vk_test_v4
 wc -l $(fd --glob '*' --exclude ./builddir/ --type file ./)
 clang-format -i $(fd --glob '*.{cpp,hpp,c,h}' --exclude ./builddir/ --type file ./)
+env SDL_VIDEODRIVER=wayland valgrind --tool=memcheck --leak-check=full --show-leak-kinds=definite,possible ./builddir/vk_test_v3/vk_test_v3
 ```
 
 [This](https://github.com/mesonbuild/meson/issues/10590) is my reasoning for not using meson.
