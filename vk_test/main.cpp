@@ -1,7 +1,7 @@
 // **INCOMPLETE PROJECT**
 
 // I am still in the process of modularizing this code.
-// `SDLUtils.{hpp,cpp}` and `SwapchainManager.{hpp,cpp}` are nicer.
+// The code in `{SDLUtils,Window,Surface}.{hpp,cpp}` is nicer.
 
 #include "Program.hpp"
 
