@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 # set(CMAKE_CXX_EXTENSIONS OFF)
-add_compile_options(-Wall -Wno-pragma-pack)
+add_compile_options(-Wall)
 
 include(FetchContent)
 
