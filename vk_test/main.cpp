@@ -3,7 +3,7 @@
 // I am still in the process of modularizing this code.
 // `SDLUtils.{hpp,cpp}` and `SwapchainManager.{hpp,cpp}` are nicer.
 
-#include "SwapchainManager.hpp"
+#include "Program.hpp"
 
 #include <vulkan/vulkan_raii.hpp>
 
