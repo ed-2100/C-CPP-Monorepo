@@ -83,29 +83,8 @@ void run(std::filesystem::path const& executableDirectory) {
 
   auto renderPass = createRenderPass(device, swapchainManager.surfaceFormat);
 
-  auto vertexShaderCode = readFile(executableDirectory / "shader.vert.spv");
-  auto vertexShader = createShaderModule(device, vertexShaderCode);
-
-  auto fragmentShaderCode = readFile(executableDirectory / "shader.frag.spv");
-  auto fragmentShader = createShaderModule(device, fragmentShaderCode);
-
-  vk::PipelineShaderStageCreateInfo vertexShaderStageCreateInfo;
-  vertexShaderStageCreateInfo.stage = vk::ShaderStageFlagBits::eVertex;
-  vertexShaderStageCreateInfo.module = vertexShader;
-  vertexShaderStageCreateInfo.pName = "main";
-
-  vk::PipelineShaderStageCreateInfo fragmentShaderStageCreateInfo;
-  fragmentShaderStageCreateInfo.stage = vk::ShaderStageFlagBits::eFragment;
-  fragmentShaderStageCreateInfo.module = fragmentShader;
-  fragmentShaderStageCreateInfo.pName = "main";
-
-  vk::PipelineShaderStageCreateInfo shaderStages[] = {
-      vertexShaderStageCreateInfo,
-      fragmentShaderStageCreateInfo,
-  };
-
   auto graphicsPipeline = createGraphicsPipeline(
-      device, swapchainManager.extent, renderPass, shaderStages);
+      device, swapchainManager.extent, renderPass, executableDirectory);
 
   std::vector<vk::raii::Framebuffer> framebuffers;
   framebuffers.reserve(swapchainManager.imageViews.size());
@@ -120,21 +99,24 @@ void run(std::filesystem::path const& executableDirectory) {
     framebuffers.push_back(device.createFramebuffer(createInfo));
   }
 
-  vk::CommandPoolCreateInfo commandPoolCreateInfo;
-  commandPoolCreateInfo.flags =
-      vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
-  commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
+  auto commandPool = [&device, &queueFamilyIndices]() {
+    vk::CommandPoolCreateInfo commandPoolCreateInfo;
+    commandPoolCreateInfo.flags =
+        vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
 
-  auto commandPool = device.createCommandPool(commandPoolCreateInfo);
+    return device.createCommandPool(commandPoolCreateInfo);
+  }();
 
   constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
-  vk::CommandBufferAllocateInfo commandBufferAllocateInfo;
-  commandBufferAllocateInfo.commandPool = commandPool;
-  commandBufferAllocateInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
+  auto commandBuffers = [&device, &commandPool]() {
+    vk::CommandBufferAllocateInfo commandBufferAllocateInfo;
+    commandBufferAllocateInfo.commandPool = commandPool;
+    commandBufferAllocateInfo.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
 
-  auto commandBuffers =
-      device.allocateCommandBuffers(commandBufferAllocateInfo);
+    return device.allocateCommandBuffers(commandBufferAllocateInfo);
+  }();
 
   std::vector<vk::raii::Semaphore> imageAvailableSemaphores;
   std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
@@ -164,13 +146,15 @@ void run(std::filesystem::path const& executableDirectory) {
                                        std::numeric_limits<uint64_t>::max());
     device.resetFences(*inFlightFences[currentFrame]);
 
-    vk::AcquireNextImageInfoKHR acquireInfo;
-    acquireInfo.swapchain = swapchainManager.swapchain;
-    acquireInfo.timeout = std::numeric_limits<uint64_t>::max();
-    acquireInfo.semaphore = imageAvailableSemaphores[currentFrame];
-    acquireInfo.deviceMask = 0b1;
+    auto imageIndex = [&]() {
+      vk::AcquireNextImageInfoKHR acquireInfo;
+      acquireInfo.swapchain = swapchainManager.swapchain;
+      acquireInfo.timeout = std::numeric_limits<uint64_t>::max();
+      acquireInfo.semaphore = imageAvailableSemaphores[currentFrame];
+      acquireInfo.deviceMask = 0b1;
 
-    auto imageIndex = device.acquireNextImage2KHR(acquireInfo).second;
+      return device.acquireNextImage2KHR(acquireInfo).second;
+    }();
 
     commandBuffers[currentFrame].reset();
 

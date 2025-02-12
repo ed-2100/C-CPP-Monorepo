@@ -84,8 +84,28 @@ vk::raii::Pipeline createGraphicsPipeline(
     vk::raii::Device const& device,
     vk::Extent2D const& swapchainExtent,
     vk::raii::RenderPass const& renderPass,
-    vk::ArrayProxyNoTemporaries<vk::PipelineShaderStageCreateInfo> const&
-        shaderStages) {
+    std::filesystem::path const& executableDirectory) {
+  auto vertexShaderCode = readFile(executableDirectory / "shader.vert.spv");
+  auto vertexShader = createShaderModule(device, vertexShaderCode);
+
+  auto fragmentShaderCode = readFile(executableDirectory / "shader.frag.spv");
+  auto fragmentShader = createShaderModule(device, fragmentShaderCode);
+
+  vk::PipelineShaderStageCreateInfo vertexShaderStageCreateInfo;
+  vertexShaderStageCreateInfo.stage = vk::ShaderStageFlagBits::eVertex;
+  vertexShaderStageCreateInfo.module = vertexShader;
+  vertexShaderStageCreateInfo.pName = "main";
+
+  vk::PipelineShaderStageCreateInfo fragmentShaderStageCreateInfo;
+  fragmentShaderStageCreateInfo.stage = vk::ShaderStageFlagBits::eFragment;
+  fragmentShaderStageCreateInfo.module = fragmentShader;
+  fragmentShaderStageCreateInfo.pName = "main";
+
+  vk::PipelineShaderStageCreateInfo shaderStages[] = {
+      vertexShaderStageCreateInfo,
+      fragmentShaderStageCreateInfo,
+  };
+
   vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo;
 
   vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo;

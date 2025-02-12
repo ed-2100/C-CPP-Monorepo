@@ -20,8 +20,7 @@ vk::raii::Pipeline createGraphicsPipeline(
     vk::raii::Device const& device,
     vk::Extent2D const& swapchainExtent,
     vk::raii::RenderPass const& renderPass,
-    vk::ArrayProxyNoTemporaries<vk::PipelineShaderStageCreateInfo> const&
-        shaderStages);
+    std::filesystem::path const& executableDirectory);
 std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> pickPhysicalDevice(
     vk::raii::Instance const& instance,
     vk::SurfaceKHR const& surface,
