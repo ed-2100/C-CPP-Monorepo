@@ -8,7 +8,7 @@
 
 vk::SurfaceFormatKHR SwapchainManager::chooseSurfaceFormat() const {
   for (auto const& availableFormat :
-       physicalDevice.getSurfaceFormatsKHR(surface)) {
+       renderer->physicalDevice.getSurfaceFormatsKHR(renderer->surface)) {
     if (availableFormat.format == vk::Format::eB8G8R8A8Srgb &&
         availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
       return availableFormat;
@@ -20,11 +20,12 @@ vk::SurfaceFormatKHR SwapchainManager::chooseSurfaceFormat() const {
 void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
   surfaceFormat = chooseSurfaceFormat();
   auto presentMode = choosePresentMode();
-  auto surfaceCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
+  auto surfaceCapabilities =
+      renderer->physicalDevice.getSurfaceCapabilitiesKHR(renderer->surface);
   extent = chooseSwapchainExtent(surfaceCapabilities);
 
   vk::SwapchainCreateInfoKHR createInfo;
-  createInfo.surface = surface;
+  createInfo.surface = renderer->surface;
   createInfo.minImageCount = surfaceCapabilities.minImageCount + 1;
   createInfo.imageFormat = surfaceFormat.format;
   createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -37,17 +38,18 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
   createInfo.oldSwapchain = oldSwapchain;
   createInfo.clipped = true;
 
-  auto uniqueFamilyIndices = queueFamilyIndices.families |
+  auto uniqueFamilyIndices = renderer->queueFamilyIndices.families |
                              std::ranges::to<std::unordered_set>() |
                              std::ranges::to<std::vector>();
-  if (queueFamilyIndices.graphicsFamily != queueFamilyIndices.presentFamily) {
+  if (renderer->queueFamilyIndices.graphicsFamily !=
+      renderer->queueFamilyIndices.presentFamily) {
     createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
   } else {
     createInfo.imageSharingMode = vk::SharingMode::eExclusive;
   }
   createInfo.setQueueFamilyIndices(uniqueFamilyIndices);
 
-  swapchain = device.createSwapchainKHR(createInfo);
+  swapchain = renderer->device.createSwapchainKHR(createInfo);
 
   images = swapchain.getImages();
 
@@ -63,12 +65,12 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
         vk::ImageSubresourceRange{vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1};
     createInfo.image = image;
 
-    imageViews.push_back(device.createImageView(createInfo));
+    imageViews.push_back(renderer->device.createImageView(createInfo));
   }
 }
 
 void SwapchainManager::recreateSwapchain() {
-  device.waitIdle();
+  renderer->device.waitIdle();
   auto oldSwapchain = std::move(swapchain);
   createSwapchain(oldSwapchain);
 }
@@ -79,7 +81,7 @@ vk::Extent2D SwapchainManager::chooseSwapchainExtent(
       std::numeric_limits<uint32_t>::max()) {
     return surfaceCapabilities.currentExtent;
   } else {
-    vk::Extent2D actualExtent = window.queryExtent();
+    vk::Extent2D actualExtent = renderer->window.queryExtent();
 
     actualExtent.width = std::clamp(actualExtent.width,
                                     surfaceCapabilities.minImageExtent.width,
@@ -93,7 +95,8 @@ vk::Extent2D SwapchainManager::chooseSwapchainExtent(
 }
 
 vk::PresentModeKHR SwapchainManager::choosePresentMode() const {
-  auto presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
+  auto presentModes =
+      renderer->physicalDevice.getSurfacePresentModesKHR(renderer->surface);
   if (presentModes.empty()) throw std::runtime_error("No present modes found!");
 
   const std::unordered_map<vk::PresentModeKHR, uint32_t> presentModePreference{

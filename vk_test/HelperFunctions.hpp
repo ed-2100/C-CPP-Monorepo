@@ -1,5 +1,15 @@
+#pragma once
+
 #include "SDLUtils.hpp"
-#include "SwapchainManager.hpp"
+
+union QueueFamilyIndexMap {
+  struct {
+    uint32_t graphicsFamily;
+    uint32_t presentFamily;
+  };
+
+  uint32_t families[2];
+};
 
 #include <SDL3/SDL_vulkan.h>
 #include <filesystem>

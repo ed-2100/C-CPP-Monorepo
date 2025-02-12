@@ -29,14 +29,24 @@ struct SDLContext {
 
 struct SDLWindow final : public Window {
   SDLWindow() = delete;
+  constexpr SDLWindow(std::nullptr_t) noexcept {}
   SDLWindow(char const* name, uint32_t w, uint32_t h);
   ~SDLWindow();
 
   SDLWindow(SDLWindow&) = delete;
   SDLWindow& operator=(SDLWindow&) = delete;
 
-  SDLWindow(SDLWindow&&) = default;
-  SDLWindow& operator=(SDLWindow&&) = default;
+  SDLWindow(SDLWindow&& rhs) noexcept
+      : Window(std::move(rhs)), handle(std::exchange(rhs.handle, {})) {}
+  SDLWindow& operator=(SDLWindow&& rhs) noexcept {
+    if (this != &rhs) {
+      Window::operator=(std::move(rhs));
+
+      // This is necessary, as the ptr would be copied otherwise.
+      handle = std::exchange(rhs.handle, {});
+    }
+    return *this;
+  };
 
   VkExtent2D queryExtent() const {
     int width, height;
@@ -48,11 +58,12 @@ struct SDLWindow final : public Window {
 
   constexpr operator SDL_Window*() const { return handle; }
 
-  SDL_Window* handle;
+  SDL_Window* handle = {};
 };
 
 struct SDLSurface final : public Surface {
   SDLSurface() = delete;
+  SDLSurface(std::nullptr_t) : Surface(nullptr) {}
   SDLSurface(SDLWindow const& window, vk::Instance instance);
   ~SDLSurface() override;
 
@@ -64,12 +75,12 @@ struct SDLSurface final : public Surface {
   SDLSurface& operator=(SDLSurface&& rhs) noexcept {
     if (this != &rhs) {
       Surface::operator=(std::move(rhs));
-      std::swap(instance, rhs.instance);
+      instance = std::exchange(rhs.instance, {});
     }
     return *this;
   }
 
-  VkSurfaceKHR createSurface(SDLWindow const& window, vk::Instance instance);
+  vk::SurfaceKHR createSurface(SDLWindow const& window, vk::Instance instance);
 
-  vk::Instance instance;
+  vk::Instance instance = {};
 };

@@ -2,6 +2,7 @@
 
 struct Surface {
   Surface() = delete;
+  Surface(std::nullptr_t) {}
   explicit Surface(vk::SurfaceKHR surface) : surface(surface) {}
   virtual ~Surface() = 0;
 
@@ -11,14 +12,14 @@ struct Surface {
   Surface(Surface&& rhs) noexcept : surface(std::exchange(rhs.surface, {})) {};
   Surface& operator=(Surface&& rhs) noexcept {
     if (this != &rhs) {
-      std::swap(surface, rhs.surface);
+      surface = std::exchange(rhs.surface, {});
     }
     return *this;
   }
 
   constexpr operator vk::SurfaceKHR() const { return surface; }
 
-  vk::SurfaceKHR surface = VK_NULL_HANDLE;
+  vk::SurfaceKHR surface = {};
 };
 
 inline Surface::~Surface() {}

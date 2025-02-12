@@ -28,7 +28,9 @@ std::span<char const* const> SDLContext::getInstanceExtensions() const {
   char const* const* sdlExtensions =
       SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
   if (nullptr == sdlExtensions) {
-    throw std::runtime_error("Failed to get SDL's required extensions!");
+    throw std::runtime_error(
+        std::string("Failed to get SDL's required extensions: ") +
+        SDL_GetError());
   }
   return std::span(sdlExtensions, sdlExtensionCount);
 }
@@ -49,11 +51,12 @@ SDLSurface::~SDLSurface() {
     SDL_Vulkan_DestroySurface(vk::Instance(instance), surface, nullptr);
   }
 }
-VkSurfaceKHR SDLSurface::createSurface(SDLWindow const& window,
-                                       vk::Instance instance) {
+vk::SurfaceKHR SDLSurface::createSurface(SDLWindow const& window,
+                                         vk::Instance instance) {
   VkSurfaceKHR surface;
   if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {
-    throw std::runtime_error("Failed to create window!");
+    throw std::runtime_error(std::string("Failed to create surface: ") +
+                             SDL_GetError());
   }
   return surface;
 }
