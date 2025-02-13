@@ -110,6 +110,7 @@ Renderer::Renderer(std::filesystem::path const& exeDir) {
     inFlightFences.push_back(device.createFence(fenceCreateInfo));
   }
 }
+
 void Renderer::run() {
   bool done = false;
   for (uint32_t currentFrame = 0; !done;
@@ -186,6 +187,7 @@ void Renderer::run() {
 
   device.waitIdle(); // Validation compliance.
 }
+
 vk::raii::Instance Renderer::createInstance(SDLContext const& sdlContext,
                                             vk::raii::Context& vkContext,
                                             void* pNext) {
@@ -211,6 +213,7 @@ vk::raii::Instance Renderer::createInstance(SDLContext const& sdlContext,
 
   return vkContext.createInstance(createInfo);
 }
+
 vk::raii::RenderPass Renderer::createRenderPass(
     vk::raii::Device const& device, vk::SurfaceFormatKHR const& surfaceFormat) {
   vk::AttachmentDescription colorAttachment;
@@ -247,6 +250,7 @@ vk::raii::RenderPass Renderer::createRenderPass(
 
   return device.createRenderPass(renderPassCreateInfo);
 }
+
 vk::raii::Pipeline Renderer::createGraphicsPipeline(
     vk::raii::Device const& device,
     vk::Extent2D const& swapchainExtent,
@@ -342,6 +346,7 @@ vk::raii::Pipeline Renderer::createGraphicsPipeline(
 
   return device.createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
 }
+
 vk::raii::Device Renderer::createDevice(
     vk::raii::PhysicalDevice const& physicalDevice,
     QueueFamilyIndexMap const& queueFamilyIndices,
@@ -368,6 +373,7 @@ vk::raii::Device Renderer::createDevice(
 
   return physicalDevice.createDevice(createInfo);
 }
+
 std::vector<uint32_t> Renderer::readFile(
     std::filesystem::path const& filename) {
   std::ifstream file(filename, std::ios::ate | std::ios::binary);
@@ -386,12 +392,14 @@ std::vector<uint32_t> Renderer::readFile(
 
   return fileContents;
 }
+
 vk::raii::ShaderModule Renderer::createShaderModule(
     vk::raii::Device const& device, std::vector<uint32_t> const& code) {
   vk::ShaderModuleCreateInfo createInfo;
   createInfo.setCode(code);
   return device.createShaderModule(createInfo);
 }
+
 std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap>
 Renderer::pickPhysicalDevice(vk::raii::Instance const& instance,
                              vk::SurfaceKHR const& surface,

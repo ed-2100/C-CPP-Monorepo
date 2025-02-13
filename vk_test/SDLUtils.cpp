@@ -11,7 +11,9 @@ SDLContext::SDLContext() {
                              SDL_GetError());
   }
 }
+
 SDLContext::~SDLContext() { SDL_Quit(); }
+
 std::shared_ptr<SDLContext> SDLContext::getInstance() {
   static std::weak_ptr<SDLContext> weakInstance;
 
@@ -23,6 +25,7 @@ std::shared_ptr<SDLContext> SDLContext::getInstance() {
 
   return sharedInstance;
 }
+
 std::span<char const* const> SDLContext::getInstanceExtensions() const {
   uint32_t sdlExtensionCount;
   char const* const* sdlExtensions =
@@ -38,6 +41,7 @@ std::span<char const* const> SDLContext::getInstanceExtensions() const {
 SDLWindow::SDLWindow(char const* name, uint32_t w, uint32_t h) {
   handle = SDL_CreateWindow(name, w, h, SDL_WINDOW_VULKAN);
 }
+
 SDLWindow::~SDLWindow() {
   if (handle) {
     SDL_DestroyWindow(handle);
@@ -46,11 +50,13 @@ SDLWindow::~SDLWindow() {
 
 SDLSurface::SDLSurface(SDLWindow const& window, vk::Instance instance)
     : Surface(createSurface(window, instance)), instance(instance) {}
+
 SDLSurface::~SDLSurface() {
   if (surface) {
     SDL_Vulkan_DestroySurface(vk::Instance(instance), surface, nullptr);
   }
 }
+
 vk::SurfaceKHR SDLSurface::createSurface(SDLWindow const& window,
                                          vk::Instance instance) {
   VkSurfaceKHR surface;
