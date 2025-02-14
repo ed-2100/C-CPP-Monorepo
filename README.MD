@@ -2,8 +2,8 @@
 
 ```sh
 time cmake -B builddir -G Ninja
-time cmake -B builddir -G Ninja -DCMAKE_BUILD_TYPE=Debug --toolchain ./clangd_compile.cmake
-time cmake -B builddir -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo --toolchain ./clangd_compile.cmake
+time cmake -B builddir -G Ninja -DCMAKE_BUILD_TYPE=Debug --toolchain ./clang_compile.cmake
+time cmake -B builddir -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo --toolchain ./clang_compile.cmake
 time ninja -C builddir
 scan-build cmake -B builddir
 scan-build make -C builddir -j $(($(nproc) - 2))
