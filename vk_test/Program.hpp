@@ -11,7 +11,7 @@
 #include "SwapchainManager.hpp"
 #include "Types.hpp"
 
-struct Renderer {
+struct Application {
   std::shared_ptr<SDLContext> sdlContext = nullptr;
   vk::raii::Context vkContext;
   SDLWindow window = nullptr;
@@ -33,8 +33,8 @@ struct Renderer {
   std::vector<vk::raii::Fence> inFlightFences;
   static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
-  Renderer() = delete;
-  Renderer(std::filesystem::path const& exeDir);
+  Application() = delete;
+  Application(std::filesystem::path const& exeDir);
 
   void run();
 

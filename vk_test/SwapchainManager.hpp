@@ -6,7 +6,7 @@ struct SwapchainManager {
 public:
   SwapchainManager() = delete;
   SwapchainManager(std::nullptr_t) {}
-  SwapchainManager(Renderer& renderer) : renderer(&renderer) {
+  SwapchainManager(Application& renderer) : renderer(&renderer) {
     createSwapchain();
   }
 
@@ -19,7 +19,7 @@ public:
   void createSwapchain(vk::SwapchainKHR oldSwapchain = nullptr);
   void recreateSwapchain();
 
-  Renderer* renderer;
+  Application* renderer;
 
   vk::SurfaceFormatKHR surfaceFormat;
   vk::Extent2D extent;

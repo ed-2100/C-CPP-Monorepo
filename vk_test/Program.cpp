@@ -28,7 +28,7 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
   return VK_FALSE;
 }
 
-Renderer::Renderer(std::filesystem::path const& exeDir) {
+Application::Application(std::filesystem::path const& exeDir) {
   sdlContext = SDLContext::getInstance();
 
   window = SDLWindow(appName1, 500, 500);
@@ -111,7 +111,7 @@ Renderer::Renderer(std::filesystem::path const& exeDir) {
   }
 }
 
-void Renderer::run() {
+void Application::run() {
   bool done = false;
   for (uint32_t currentFrame = 0; !done;
        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT) {
@@ -188,7 +188,7 @@ void Renderer::run() {
   device.waitIdle(); // Validation compliance.
 }
 
-vk::raii::Instance Renderer::createInstance(SDLContext const& sdlContext,
+vk::raii::Instance Application::createInstance(SDLContext const& sdlContext,
                                             vk::raii::Context& vkContext,
                                             void* pNext) {
   vk::ApplicationInfo appInfo;
@@ -214,7 +214,7 @@ vk::raii::Instance Renderer::createInstance(SDLContext const& sdlContext,
   return vkContext.createInstance(createInfo);
 }
 
-vk::raii::RenderPass Renderer::createRenderPass(
+vk::raii::RenderPass Application::createRenderPass(
     vk::raii::Device const& device, vk::SurfaceFormatKHR const& surfaceFormat) {
   vk::AttachmentDescription colorAttachment;
   colorAttachment.format = surfaceFormat.format;
@@ -251,7 +251,7 @@ vk::raii::RenderPass Renderer::createRenderPass(
   return device.createRenderPass(renderPassCreateInfo);
 }
 
-vk::raii::Pipeline Renderer::createGraphicsPipeline(
+vk::raii::Pipeline Application::createGraphicsPipeline(
     vk::raii::Device const& device,
     vk::Extent2D const& swapchainExtent,
     vk::raii::RenderPass const& renderPass,
@@ -347,7 +347,7 @@ vk::raii::Pipeline Renderer::createGraphicsPipeline(
   return device.createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
 }
 
-vk::raii::Device Renderer::createDevice(
+vk::raii::Device Application::createDevice(
     vk::raii::PhysicalDevice const& physicalDevice,
     QueueFamilyIndexMap const& queueFamilyIndices,
     std::span<char const* const> deviceExtensions) {
@@ -374,7 +374,7 @@ vk::raii::Device Renderer::createDevice(
   return physicalDevice.createDevice(createInfo);
 }
 
-std::vector<uint32_t> Renderer::readFile(
+std::vector<uint32_t> Application::readFile(
     std::filesystem::path const& filename) {
   std::ifstream file(filename, std::ios::ate | std::ios::binary);
   if (!file.is_open()) throw std::runtime_error("Failed to open file!");
@@ -393,7 +393,7 @@ std::vector<uint32_t> Renderer::readFile(
   return fileContents;
 }
 
-vk::raii::ShaderModule Renderer::createShaderModule(
+vk::raii::ShaderModule Application::createShaderModule(
     vk::raii::Device const& device, std::vector<uint32_t> const& code) {
   vk::ShaderModuleCreateInfo createInfo;
   createInfo.setCode(code);
@@ -401,7 +401,7 @@ vk::raii::ShaderModule Renderer::createShaderModule(
 }
 
 std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap>
-Renderer::pickPhysicalDevice(vk::raii::Instance const& instance,
+Application::pickPhysicalDevice(vk::raii::Instance const& instance,
                              vk::SurfaceKHR const& surface,
                              std::span<char const* const> deviceExtensions) {
   auto physicalDevices = instance.enumeratePhysicalDevices();

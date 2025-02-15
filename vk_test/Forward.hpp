@@ -1,3 +1,3 @@
-struct Renderer;
+struct Application;
 struct SwapchainManager;
 union QueueFamilyIndexMap;
