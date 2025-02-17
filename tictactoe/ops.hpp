@@ -3,6 +3,7 @@
 #include <array>
 #include <bitset>
 
+/// The Tic Tac Toe game.
 class Game {
   /// Represents the game board.
   ///
