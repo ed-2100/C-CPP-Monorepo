@@ -8,6 +8,9 @@ constexpr std::array player_map{
     "\u001b[34mO\u001b[0m",
 };
 
+/// ANSI escape code to clear the screen.
+constexpr char const* clear_screen = "\033[2J\033[H";
+
 void Game::run() {
   // Initialize the game board here so that the game can be restarted.
   game_board = {
@@ -30,7 +33,7 @@ void Game::printTiles() {
   auto filled_spots = game_board[0] | game_board[1];
 
   // Print the Game Board.
-  std::cout << "+---+---+---+\n";
+  std::cout << clear_screen << "+---+---+---+\n";
   for (int row = 0; row < 9; row += 3) {
     std::cout << '|';
     for (int col = 0; col < 3; col++) {
