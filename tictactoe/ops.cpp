@@ -2,8 +2,30 @@
 
 #include <iostream>
 
-/// Prints the game board.
-void printTiles(GameState game_board) {
+/// Maps the player ID to a string representation of their game piece.
+constexpr std::array player_map{
+    "\u001b[31mX\u001b[0m",
+    "\u001b[34mO\u001b[0m",
+};
+
+void Game::run() {
+  // Initialize the game board here so that the game can be restarted.
+  game_board = {
+      0b000000000,
+      0b000000000,
+  };
+
+  // The game loop.
+  for (bool player = false;; player = !player) {
+    printTiles();
+    getInput(player);
+    if (checkForWin(player)) {
+      break;
+    }
+  }
+}
+
+void Game::printTiles() {
   // Compute the filled spots on the gameboard.
   auto filled_spots = game_board[0] | game_board[1];
 
@@ -26,9 +48,7 @@ void printTiles(GameState game_board) {
   }
 }
 
-/// Prompts the user for input, checks its validity, and stores it in the game
-/// state.
-void getInput(GameState& game_board, bool player) {
+void Game::getInput(bool player) {
   // Prompt loop.
   while (true) {
     // Print out the prompt.
@@ -68,8 +88,7 @@ void getInput(GameState& game_board, bool player) {
   }
 }
 
-/// Checks a player's win-state.
-bool checkForWin(GameState game_board, bool player) {
+bool Game::checkForWin(bool player) {
   // All possible win conditions.
   constexpr std::array<std::bitset<9>, 8> win_states{
       0b111000000,
@@ -84,7 +103,7 @@ bool checkForWin(GameState game_board, bool player) {
 
   // Check if the game is a draw.
   if ((game_board[0] | game_board[1]) == 0b111111111) {
-    printTiles(game_board);
+    printTiles();
     std::cout << "It's a draw!\n";
     return true;
   }
@@ -92,7 +111,7 @@ bool checkForWin(GameState game_board, bool player) {
   // Check the board against each win-state.
   for (auto win_state : win_states) {
     if ((game_board[player] & win_state) == win_state) {
-      printTiles(game_board);
+      printTiles();
       std::cout << "Player " << player_map[player] << " wins!\n";
       return true;
     }

@@ -3,13 +3,24 @@
 #include <array>
 #include <bitset>
 
-constexpr std::array player_map{
-    "\u001b[31mX\u001b[0m",
-    "\u001b[34mO\u001b[0m",
+class Game {
+  /// Represents the game board.
+  ///
+  /// arr[0] = Player X pieces
+  /// arr[1] = Player O pieces
+  std::array<std::bitset<9>, 2> game_board;
+
+public:
+  /// The main entry point for the game.
+  void run();
+
+private:
+  /// Prints the current state of the game board.
+  void printTiles();
+
+  /// Gets the player's input and updates the game board.
+  void getInput(bool player);
+
+  /// Checks if the current player has won or if the game is a draw.
+  bool checkForWin(bool player);
 };
-
-using GameState = std::array<std::bitset<9>, 2>;
-
-void printTiles(GameState game_board);
-void getInput(GameState& game_board, bool player);
-bool checkForWin(GameState game_board, bool player);
