@@ -2,7 +2,6 @@
 
 #include "cleanupstack.h"
 
-/// Initializes ECleanupStack.
 bool CleanupStackInit(CleanupStack* cleanupStack, size_t capacity) {
   if (0 == capacity) {
     return false;
@@ -19,7 +18,6 @@ bool CleanupStackInit(CleanupStack* cleanupStack, size_t capacity) {
   return true;
 }
 
-/// Automatically reserves extra space in the ECleanupStack, if necessary.
 bool CleanupStackReserve(CleanupStack* cleanupStack, size_t size) {
   if (size > cleanupStack->capacity - cleanupStack->used) {
     size_t newCapacity = cleanupStack->capacity * 2;
@@ -39,7 +37,6 @@ bool CleanupStackReserve(CleanupStack* cleanupStack, size_t size) {
   return true;
 }
 
-/// Cleans up all memory referenced on the ECleanupStack.
 void CleanupStackFlush(CleanupStack* cleanupStack) {
   void* pEnd = cleanupStack->ptr + cleanupStack->used;
   while (pEnd > cleanupStack->ptr) {
@@ -57,7 +54,6 @@ void CleanupStackFlush(CleanupStack* cleanupStack) {
   }
 }
 
-/// Pushed a malloc-ed pointer to the ECleanupStack.
 bool CleanupStackPushMalloc(CleanupStack* cleanupStack, void* ptr) {
   if (!CleanupStackReserve(cleanupStack, sizeof(CleanupTaskMalloc))) {
     return false;
