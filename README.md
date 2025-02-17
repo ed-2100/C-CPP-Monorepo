@@ -43,7 +43,7 @@ make -C builddir
   Requires `valgrind`.
 
   ```sh
-  valgrind --tool=memcheck --leak-check=full --show-leak-kinds=definite,possible ./builddir/my_exe/me_exe
+  valgrind --tool=memcheck --leak-check=full --show-leak-kinds=definite,possible ./builddir/my_exe/my_exe
   ```
 
 - **Static Analysis** \
