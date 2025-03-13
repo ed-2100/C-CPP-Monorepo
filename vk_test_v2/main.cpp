@@ -7,45 +7,44 @@
 #include <iostream>
 
 class App {
-  GLFWwindow* window;
+    GLFWwindow* window;
 
 public:
-  void run() {
-    initWindow();
-    initVulkan();
-    mainLoop();
-    cleanup();
-  }
+    void run() {
+        initWindow();
+        initVulkan();
+        mainLoop();
+        cleanup();
+    }
 
 private:
-  void initWindow();
+    void initWindow();
 
-  void initVulkan() {}
+    void initVulkan() {}
 
-  void mainLoop() {}
+    void mainLoop() {}
 
-  void cleanup() {}
+    void cleanup() {}
 };
 
 int main() {
-  App app;
+    App app;
 
-  try {
-    app.run();
-  } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
+    try {
+        app.run();
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 void App::initWindow() {
-  glfwInit();
+    glfwInit();
 
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-  window =
-      glfwCreateWindow(500, 500, "Window Title Placeholder", nullptr, nullptr);
+    window = glfwCreateWindow(500, 500, "Window Title Placeholder", nullptr, nullptr);
 }

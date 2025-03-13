@@ -3,13 +3,13 @@
 #include <iostream>
 
 int main() {
-  Game app;
+    Game app;
 
-  // Introduction.
-  std::cout << "TicTacToe!\n";
+    // Introduction.
+    std::cout << "TicTacToe!\n";
 
-  // Run the game.
-  app.run();
+    // Run the game.
+    app.run();
 
-  return 0;
+    return 0;
 }

@@ -1,11 +1,25 @@
 BasedOnStyle: Google
 Language: Cpp
 Standard: c++20
-ColumnLimit: 80
-BreakConstructorInitializers: BeforeColon
+ColumnLimit: 100
 ReflowComments: false
 BinPackParameters: false
 BinPackArguments: false
-AccessModifierOffset: -2
+
+IndentWidth: 4
+AccessModifierOffset: -4
+ContinuationIndentWidth: 4
+
+AlignAfterOpenBracket: BlockIndent
+AlignOperands: DontAlign
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: False
+BreakConstructorInitializers: AfterColon
+
+BitFieldColonSpacing: Both
+
 SpacesBeforeTrailingComments: 1
 IncludeBlocks: Preserve
+
+AllowShortBlocksOnASingleLine: Empty
+InsertBraces: True

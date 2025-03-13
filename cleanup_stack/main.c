@@ -23,34 +23,34 @@
 #endif
 
 int main(int /*argc*/, const char** /*argv*/) {
-  // NOTE: All of the flushing is for if the program segfaults.
+    // NOTE: All of the flushing is for if the program segfaults.
 
-  printf("Initializing CleanupStack...");
-  fflush(stdout);
-
-  CleanupStack cleanupStack;
-  if (!CleanupStackInit(&cleanupStack, 1)) {
-    printf("Failed to initialize CleanupStack!\n");
+    printf("Initializing CleanupStack...");
     fflush(stdout);
-    return 1;
-  }
 
-  printf(" Done.\nAllocating int...");
-  fflush(stdout);
+    CleanupStack cleanupStack;
+    if (!CleanupStackInit(&cleanupStack, 1)) {
+        printf("Failed to initialize CleanupStack!\n");
+        fflush(stdout);
+        return 1;
+    }
 
-  int* ohNoA = malloc(sizeof(int));
-  if (!CleanupStackPushMalloc(&cleanupStack, ohNoA)) {
-    printf("Failed to add a resource to the CleanupStack!\n");
+    printf(" Done.\nAllocating int...");
     fflush(stdout);
-    free(ohNoA);
-    return 1;
-  }
 
-  printf(" Done.\nFlushing CleanupStack...");
-  fflush(stdout);
+    int* ohNoA = malloc(sizeof(int));
+    if (!CleanupStackPushMalloc(&cleanupStack, ohNoA)) {
+        printf("Failed to add a resource to the CleanupStack!\n");
+        fflush(stdout);
+        free(ohNoA);
+        return 1;
+    }
 
-  CleanupStackFlush(&cleanupStack);
+    printf(" Done.\nFlushing CleanupStack...");
+    fflush(stdout);
 
-  printf(" Done.\nExiting...\n");
-  fflush(stdout);
+    CleanupStackFlush(&cleanupStack);
+
+    printf(" Done.\nExiting...\n");
+    fflush(stdout);
 }

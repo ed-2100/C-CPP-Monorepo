@@ -5,8 +5,6 @@
     "stdlib.h": "c",
     "stdio.h": "c"
   },
-  "editor.detectIndentation": false,
-  "editor.tabSize": 2,
   "files.exclude": {
     "**/.git": false,
   },

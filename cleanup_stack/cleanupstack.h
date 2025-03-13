@@ -4,22 +4,22 @@
 
 /// The `CleanupStack` structure.
 typedef struct {
-  void* ptr;
-  size_t used;
-  size_t capacity;
+    void* ptr;
+    size_t used;
+    size_t capacity;
 } CleanupStack;
 
 /// An enumeration of all the cleanup tasks.
 enum CleanupTask {
-  CLEANUP_TASK_MALLOC,
-  /*OTHER TASKS*/
+    CLEANUP_TASK_MALLOC,
+    /*OTHER TASKS*/
 };
 
 /// Represents a `malloc` task.
 #pragma pack(1)
 typedef struct {
-  void* ptr;
-  enum CleanupTask sType;
+    void* ptr;
+    enum CleanupTask sType;
 } CleanupTaskMalloc;
 
 /*OTHER TASK STRUCTS*/
