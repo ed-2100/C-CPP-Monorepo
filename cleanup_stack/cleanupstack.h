@@ -17,6 +17,7 @@ enum CleanupTask {
 
 /// Represents a `malloc` task.
 #pragma pack(1)
+
 typedef struct {
     void* ptr;
     enum CleanupTask sType;

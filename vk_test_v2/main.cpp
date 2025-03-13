@@ -3,6 +3,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <chrono>
 #include <cstdlib>
 #include <iostream>
 
@@ -22,9 +23,39 @@ private:
 
     void initVulkan() {}
 
-    void mainLoop() {}
+    void mainLoop() {
+        auto startTime = std::chrono::high_resolution_clock::now();
 
-    void cleanup() {}
+        auto lastPrintTime = startTime;
+
+        auto lastLoopTime = startTime;
+        while (!glfwWindowShouldClose(window)) {
+            glfwPollEvents();
+
+            // Stuff here
+
+            auto loopTime = std::chrono::high_resolution_clock::now();
+
+            auto deltaTime =
+                std::chrono::duration_cast<std::chrono::duration<float>>(
+                    lastLoopTime - lastPrintTime
+                )
+                    .count();
+
+            if (deltaTime >= 1.0) {
+                std::cout << "FPS: " << 1.0 / deltaTime << std::endl;
+                lastPrintTime = lastLoopTime;
+            }
+
+            lastLoopTime = loopTime;
+        }
+    }
+
+    void cleanup() {
+        glfwDestroyWindow(window);
+
+        glfwTerminate();
+    }
 };
 
 int main() {
@@ -46,5 +77,11 @@ void App::initWindow() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(500, 500, "Window Title Placeholder", nullptr, nullptr);
+    window = glfwCreateWindow(
+        500,
+        500,
+        "Window Title Placeholder",
+        nullptr,
+        nullptr
+    );
 }

@@ -14,7 +14,8 @@
 #include <iostream>
 
 int main(int /*argc*/, char const* const* argv) {
-    auto exeDir = std::filesystem::canonical(std::filesystem::path(argv[0])).parent_path();
+    auto exeDir = std::filesystem::canonical(std::filesystem::path(argv[0]))
+                      .parent_path();
     try {
         Application renderer(exeDir);
         renderer.run();

@@ -4,6 +4,7 @@
 
 struct Window {
     Window() {}
+
     virtual ~Window() = 0;
 
     Window(Window const&) = delete;

@@ -12,7 +12,11 @@ constexpr size_t height = 1000;
 
 int main(int /*argc*/, const char** /*argv*/) {
     sf::RenderWindow window;
-    window.create(sf::VideoMode({width, height}), "GOL", sf::Style::Titlebar | sf::Style::Close);
+    window.create(
+        sf::VideoMode({width, height}),
+        "GOL",
+        sf::Style::Titlebar | sf::Style::Close
+    );
     // window.setFramerateLimit(100);
 
     sf::Texture texture({width, height});
@@ -30,7 +34,9 @@ int main(int /*argc*/, const char** /*argv*/) {
     auto past_state = std::make_unique<bool[][width]>(height);
     auto state = std::make_unique<bool[][width]>(height);
 
-    auto rand = std::minstd_rand(std::chrono::steady_clock::now().time_since_epoch().count());
+    auto rand = std::minstd_rand(
+        std::chrono::steady_clock::now().time_since_epoch().count()
+    );
     for (size_t row = 0; row < height; row++) {
         for (size_t col = 0; col < width; col++) {
             past_state[row][col] = rand() % 2 == 0;
@@ -46,7 +52,8 @@ int main(int /*argc*/, const char** /*argv*/) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
             } else if (event->is<sf::Event::KeyPressed>()) {
-                if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape) {
+                if (event->getIf<sf::Event::KeyPressed>()->code
+                    == sf::Keyboard::Key::Escape) {
                     window.close();
                 }
             }
@@ -73,7 +80,8 @@ int main(int /*argc*/, const char** /*argv*/) {
                     sum--;
                 }
 
-                const bool result = sum == 3 || (past_state[row][col] && sum == 2);
+                const bool result =
+                    sum == 3 || (past_state[row][col] && sum == 2);
                 state[row][col] = result;
                 pixels[row][col][3] = result * 255;
             }
@@ -89,15 +97,17 @@ int main(int /*argc*/, const char** /*argv*/) {
         auto end_time = std::chrono::steady_clock::now();
 
         static auto last_printed =
-            std::chrono::time_point<std::chrono::steady_clock>(std::chrono::seconds(0));
+            std::chrono::time_point<std::chrono::steady_clock>(
+                std::chrono::seconds(0)
+            );
 
         if (end_time - last_printed > std::chrono::milliseconds(100)) {
             std::cout << "\033[s\033[K"
-                      << 1 /
-                    std::chrono::duration_cast<std::chrono::duration<float>>(
-                        end_time - last_end_time
+                      << 1
+                    / std::chrono::duration_cast<std::chrono::duration<float>>(
+                          end_time - last_end_time
                     )
-                        .count()
+                          .count()
                       << "\033[u" << std::flush;
             last_printed = end_time;
         }

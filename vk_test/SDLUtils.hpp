@@ -27,9 +27,11 @@ struct SDLContext {
     std::span<char const* const> getInstanceExtensions() const;
 };
 
-struct SDLWindow final : public Window {
+struct SDLWindow final: public Window {
     SDLWindow() = delete;
+
     SDLWindow(std::nullptr_t) noexcept {}
+
     SDLWindow(char const* name, uint32_t w, uint32_t h);
     ~SDLWindow();
 
@@ -37,7 +39,9 @@ struct SDLWindow final : public Window {
     SDLWindow& operator=(SDLWindow&) = delete;
 
     SDLWindow(SDLWindow&& rhs) noexcept :
-        Window(std::move(rhs)), handle(std::exchange(rhs.handle, {})) {}
+        Window(std::move(rhs)),
+        handle(std::exchange(rhs.handle, {})) {}
+
     SDLWindow& operator=(SDLWindow&& rhs) noexcept {
         if (this != &rhs) {
             Window::operator=(std::move(rhs));
@@ -52,17 +56,24 @@ struct SDLWindow final : public Window {
         int width, height;
         SDL_GetWindowSize(handle, &width, &height);
 
-        return VkExtent2D{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+        return VkExtent2D {
+            static_cast<uint32_t>(width),
+            static_cast<uint32_t>(height)
+        };
     }
 
-    constexpr operator SDL_Window*() const { return handle; }
+    constexpr operator SDL_Window*() const {
+        return handle;
+    }
 
     SDL_Window* handle = {};
 };
 
-struct SDLSurface final : public Surface {
+struct SDLSurface final: public Surface {
     SDLSurface() = delete;
+
     SDLSurface(std::nullptr_t) : Surface(nullptr) {}
+
     SDLSurface(SDLWindow const& window, vk::Instance instance);
     ~SDLSurface() override;
 
@@ -70,7 +81,9 @@ struct SDLSurface final : public Surface {
     SDLSurface& operator=(SDLSurface&) = delete;
 
     SDLSurface(SDLSurface&& rhs) noexcept :
-        Surface(std::move(rhs)), instance(std::exchange(rhs.instance, {})) {}
+        Surface(std::move(rhs)),
+        instance(std::exchange(rhs.instance, {})) {}
+
     SDLSurface& operator=(SDLSurface&& rhs) noexcept {
         if (this != &rhs) {
             Surface::operator=(std::move(rhs));
@@ -79,7 +92,8 @@ struct SDLSurface final : public Surface {
         return *this;
     }
 
-    vk::SurfaceKHR createSurface(SDLWindow const& window, vk::Instance instance);
+    vk::SurfaceKHR
+    createSurface(SDLWindow const& window, vk::Instance instance);
 
     vk::Instance instance = {};
 };

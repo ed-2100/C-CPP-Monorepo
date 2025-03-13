@@ -17,9 +17,9 @@
 
 // https://github.com/microsoft/vscode-cpptools/issues/10696
 #ifdef __INTELLISENSE__
-#define bool _Bool
-#define true 1
-#define false 0
+    #define bool _Bool
+    #define true 1
+    #define false 0
 #endif
 
 int main(int /*argc*/, const char** /*argv*/) {

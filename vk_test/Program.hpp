@@ -40,10 +40,13 @@ struct Application {
 
 private:
     static vk::raii::Instance createInstance(
-        SDLContext const& sdlContext, vk::raii::Context& context, void* pNext
+        SDLContext const& sdlContext,
+        vk::raii::Context& context,
+        void* pNext
     );
     static vk::raii::RenderPass createRenderPass(
-        vk::raii::Device const& device, vk::SurfaceFormatKHR const& surfaceFormat
+        vk::raii::Device const& device,
+        vk::SurfaceFormatKHR const& surfaceFormat
     );
     static vk::raii::Pipeline createGraphicsPipeline(
         vk::raii::Device const& device,
@@ -56,11 +59,14 @@ private:
         QueueFamilyIndexMap const& queueFamilyIndices,
         std::span<char const* const> deviceExtensions
     );
-    static std::vector<uint32_t> readFile(std::filesystem::path const& filename);
-    static vk::raii::ShaderModule createShaderModule(
-        vk::raii::Device const& device, std::vector<uint32_t> const& code
+    static std::vector<uint32_t> readFile(std::filesystem::path const& filename
     );
-    static std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> pickPhysicalDevice(
+    static vk::raii::ShaderModule createShaderModule(
+        vk::raii::Device const& device,
+        std::vector<uint32_t> const& code
+    );
+    static std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap>
+    pickPhysicalDevice(
         vk::raii::Instance const& instance,
         vk::SurfaceKHR const& surface,
         std::span<char const* const> deviceExtensions

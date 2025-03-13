@@ -18,7 +18,9 @@ constexpr uint32_t height = 1000;
 int main(int /*argc*/, const char** /*argv*/) {
     sf::RenderWindow window;
     window.create(
-        sf::VideoMode({width, height}), "Glowing Dots", sf::Style::Titlebar | sf::Style::Close
+        sf::VideoMode({width, height}),
+        "Glowing Dots",
+        sf::Style::Titlebar | sf::Style::Close
     );
     // window.setFramerateLimit(100);
 
@@ -42,14 +44,17 @@ int main(int /*argc*/, const char** /*argv*/) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
             } else if (event->is<sf::Event::KeyPressed>()) {
-                if (event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape) {
+                if (event->getIf<sf::Event::KeyPressed>()->code
+                    == sf::Keyboard::Key::Escape) {
                     window.close();
                 }
             }
         }
 
         const float time_elapsed =
-            std::chrono::duration_cast<std::chrono::duration<float>>(last_end_time - starttime)
+            std::chrono::duration_cast<std::chrono::duration<float>>(
+                last_end_time - starttime
+            )
                 .count();
 
         const float rotation = 0.5 * M_PI * time_elapsed;
@@ -74,12 +79,15 @@ int main(int /*argc*/, const char** /*argv*/) {
                 const __m128 delta_y = r_dot_y - y;
                 const __m128 dist_sqrd = delta_x * delta_x + delta_y * delta_y;
                 const __m128 mag = 1 / (dist_sqrd * 30 + 1);
+
                 const union {
                     __m128 simd;
                     std::array<float, 4> indices;
                 } pixarray = {
-                    .simd =
-                        _mm_min_ps((mag + _mm_permute_ps(mag, 0xFF)) * 255 + 0.5, _mm_set1_ps(255))
+                    .simd = _mm_min_ps(
+                        (mag + _mm_permute_ps(mag, 0xFF)) * 255 + 0.5,
+                        _mm_set1_ps(255)
+                    )
                 };
 
                 // If only there were a better way to do this...
@@ -98,15 +106,17 @@ int main(int /*argc*/, const char** /*argv*/) {
         auto end_time = std::chrono::steady_clock::now();
 
         static auto last_printed =
-            std::chrono::time_point<std::chrono::steady_clock>(std::chrono::seconds(0));
+            std::chrono::time_point<std::chrono::steady_clock>(
+                std::chrono::seconds(0)
+            );
 
         if (end_time - last_printed > std::chrono::milliseconds(100)) {
             std::cout << "\033[s\033[K"
-                      << 1 /
-                    std::chrono::duration_cast<std::chrono::duration<float>>(
-                        end_time - last_end_time
+                      << 1
+                    / std::chrono::duration_cast<std::chrono::duration<float>>(
+                          end_time - last_end_time
                     )
-                        .count()
+                          .count()
                       << "\033[u" << std::flush;
             last_printed = end_time;
         }

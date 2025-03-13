@@ -5,8 +5,12 @@
 struct SwapchainManager {
 public:
     SwapchainManager() = delete;
+
     SwapchainManager(std::nullptr_t) {}
-    SwapchainManager(Application& renderer) : renderer(&renderer) { createSwapchain(); }
+
+    SwapchainManager(Application& renderer) : renderer(&renderer) {
+        createSwapchain();
+    }
 
     SwapchainManager(const SwapchainManager&) = delete;
     SwapchainManager& operator=(const SwapchainManager&) = delete;
@@ -30,5 +34,7 @@ public:
 private:
     vk::PresentModeKHR choosePresentMode() const;
     vk::SurfaceFormatKHR chooseSurfaceFormat() const;
-    vk::Extent2D chooseSwapchainExtent(const vk::SurfaceCapabilitiesKHR& surfaceCapabilities) const;
+    vk::Extent2D
+    chooseSwapchainExtent(const vk::SurfaceCapabilitiesKHR& surfaceCapabilities
+    ) const;
 };

@@ -40,7 +40,8 @@ bool CleanupStackReserve(CleanupStack* cleanupStack, size_t size) {
 void CleanupStackFlush(CleanupStack* cleanupStack) {
     void* pEnd = cleanupStack->ptr + cleanupStack->used;
     while (pEnd > cleanupStack->ptr) {
-        enum CleanupTask sType = *(enum CleanupTask*)(pEnd -= sizeof(enum CleanupTask));
+        enum CleanupTask sType =
+            *(enum CleanupTask*)(pEnd -= sizeof(enum CleanupTask));
 
         switch (sType) {
             case CLEANUP_TASK_MALLOC: {
@@ -58,7 +59,8 @@ bool CleanupStackPushMalloc(CleanupStack* cleanupStack, void* ptr) {
         return false;
     }
 
-    CleanupTaskMalloc* newStruct = (CleanupTaskMalloc*)(cleanupStack->ptr + cleanupStack->used);
+    CleanupTaskMalloc* newStruct =
+        (CleanupTaskMalloc*)(cleanupStack->ptr + cleanupStack->used);
 
     newStruct->ptr = ptr;
     newStruct->sType = CLEANUP_TASK_MALLOC;

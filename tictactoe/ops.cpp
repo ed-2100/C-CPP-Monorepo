@@ -3,7 +3,7 @@
 #include <iostream>
 
 /// Maps the player ID to a string representation of their game piece.
-constexpr std::array player_map{
+constexpr std::array player_map {
     "\u001b[31mX\u001b[0m",
     "\u001b[34mO\u001b[0m",
 };
@@ -93,7 +93,7 @@ void Game::getInput(bool player) {
 
 bool Game::checkForWin(bool player) {
     // All possible win conditions.
-    constexpr std::array<std::bitset<9>, 8> win_states{
+    constexpr std::array<std::bitset<9>, 8> win_states {
         0b111000000,
         0b000111000,
         0b000000111,
