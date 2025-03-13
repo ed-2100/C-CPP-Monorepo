@@ -29,7 +29,7 @@ struct SDLContext {
 
 struct SDLWindow final : public Window {
     SDLWindow() = delete;
-    constexpr SDLWindow(std::nullptr_t) noexcept {}
+    SDLWindow(std::nullptr_t) noexcept {}
     SDLWindow(char const* name, uint32_t w, uint32_t h);
     ~SDLWindow();
 
