@@ -27,7 +27,7 @@ FetchContent_MakeAvailable(SFML)
 
 find_package(SDL3 REQUIRED)
 find_package(Vulkan REQUIRED)
-# find_package(glfw3 REQUIRED)
+find_package(glfw3 REQUIRED)
 # find_package(glm REQUIRED)
 
 add_subdirectory(cleanup_stack)
