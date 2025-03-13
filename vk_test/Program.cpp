@@ -19,9 +19,9 @@ const std::array deviceExtensions1{
 char const* const appName1 = "Hello Triangle";
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
-debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
-              VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
-              VkDebugUtilsMessengerCallbackDataEXT const* pCallbackData,
+debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
+              vk::DebugUtilsMessageTypeFlagsEXT /*messageType*/,
+              vk::DebugUtilsMessengerCallbackDataEXT const* pCallbackData,
               void* /*pUserData*/) {
   std::cerr << "Validation layer message: " << pCallbackData->pMessage << '\n';
 
@@ -189,8 +189,8 @@ void Application::run() {
 }
 
 vk::raii::Instance Application::createInstance(SDLContext const& sdlContext,
-                                            vk::raii::Context& vkContext,
-                                            void* pNext) {
+                                               vk::raii::Context& vkContext,
+                                               void* pNext) {
   vk::ApplicationInfo appInfo;
   appInfo.pApplicationName = appName1;
   appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
@@ -402,8 +402,8 @@ vk::raii::ShaderModule Application::createShaderModule(
 
 std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap>
 Application::pickPhysicalDevice(vk::raii::Instance const& instance,
-                             vk::SurfaceKHR const& surface,
-                             std::span<char const* const> deviceExtensions) {
+                                vk::SurfaceKHR const& surface,
+                                std::span<char const* const> deviceExtensions) {
   auto physicalDevices = instance.enumeratePhysicalDevices();
 
   for (auto& physicalDevice : physicalDevices) {
