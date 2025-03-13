@@ -74,19 +74,24 @@ void SwapchainManager::recreateSwapchain() {
     createSwapchain(oldSwapchain);
 }
 
-vk::Extent2D SwapchainManager::chooseSwapchainExtent(
-    vk::SurfaceCapabilitiesKHR const &surfaceCapabilities) const {
+vk::Extent2D
+SwapchainManager::chooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const &surfaceCapabilities
+) const {
     if (surfaceCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return surfaceCapabilities.currentExtent;
     } else {
         vk::Extent2D actualExtent = renderer->window.queryExtent();
 
-        actualExtent.width =
-            std::clamp(actualExtent.width, surfaceCapabilities.minImageExtent.width,
-                       surfaceCapabilities.maxImageExtent.width);
-        actualExtent.height =
-            std::clamp(actualExtent.height, surfaceCapabilities.minImageExtent.height,
-                       surfaceCapabilities.maxImageExtent.height);
+        actualExtent.width = std::clamp(
+            actualExtent.width,
+            surfaceCapabilities.minImageExtent.width,
+            surfaceCapabilities.maxImageExtent.width
+        );
+        actualExtent.height = std::clamp(
+            actualExtent.height,
+            surfaceCapabilities.minImageExtent.height,
+            surfaceCapabilities.maxImageExtent.height
+        );
 
         return actualExtent;
     }

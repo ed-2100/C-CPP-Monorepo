@@ -8,7 +8,9 @@ public:
 
     SwapchainManager(std::nullptr_t) {}
 
-    SwapchainManager(Application &renderer) : renderer(&renderer) { createSwapchain(); }
+    SwapchainManager(Application &renderer) : renderer(&renderer) {
+        createSwapchain();
+    }
 
     SwapchainManager(const SwapchainManager &) = delete;
     SwapchainManager &operator=(const SwapchainManager &) = delete;

@@ -21,8 +21,11 @@ int main(int /*argc*/, const char ** /*argv*/) {
 
     auto pixels = std::make_unique<uint8_t[][width][4]>(height);
 
-    std::fill(reinterpret_cast<uint8_t *>(pixels.get()),
-              reinterpret_cast<uint8_t *>(pixels.get()) + height * width * 4, 0);
+    std::fill(
+        reinterpret_cast<uint8_t *>(pixels.get()),
+        reinterpret_cast<uint8_t *>(pixels.get()) + height * width * 4,
+        0
+    );
 
     auto past_state = std::make_unique<bool[][width]>(height);
     auto state = std::make_unique<bool[][width]>(height);
@@ -90,8 +93,9 @@ int main(int /*argc*/, const char ** /*argv*/) {
 
         if (end_time - last_printed > std::chrono::milliseconds(100)) {
             std::cout << "\033[s\033[K"
-                      << 1 / std::chrono::duration_cast<std::chrono::duration<float>>(end_time -
-                                                                                      last_end_time)
+                      << 1 / std::chrono::duration_cast<std::chrono::duration<float>>(
+                                 end_time - last_end_time
+                             )
                                  .count()
                       << "\033[u" << std::flush;
             last_printed = end_time;

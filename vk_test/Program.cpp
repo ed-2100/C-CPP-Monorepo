@@ -21,7 +21,8 @@ char const *const appName1 = "Hello Triangle";
 VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     vk::DebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
     vk::DebugUtilsMessageTypeFlagsEXT /*messageType*/,
-    vk::DebugUtilsMessengerCallbackDataEXT const *pCallbackData, void * /*pUserData*/
+    vk::DebugUtilsMessengerCallbackDataEXT const *pCallbackData,
+    void * /*pUserData*/
 ) {
     std::cerr << "Validation layer message: " << pCallbackData->pMessage << '\n';
 
@@ -110,8 +111,11 @@ void Application::run() {
     for (uint32_t currentFrame = 0; !done;
          currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT) {
         [[maybe_unused]]
-        auto _temp0 = device.waitForFences(*inFlightFences[currentFrame], true,
-                                           std::numeric_limits<uint64_t>::max());
+        auto _temp0 = device.waitForFences(
+            *inFlightFences[currentFrame],
+            true,
+            std::numeric_limits<uint64_t>::max()
+        );
         device.resetFences(*inFlightFences[currentFrame]);
 
         auto imageIndex = [&]() {
@@ -137,16 +141,21 @@ void Application::run() {
         renderPassBeginInfo.renderArea = vk::Rect2D{{0, 0}, swapchainManager.extent};
         renderPassBeginInfo.setClearValues(clearColor);
 
-        commandBuffers[currentFrame].beginRenderPass(renderPassBeginInfo,
-                                                     vk::SubpassContents::eInline);
-        commandBuffers[currentFrame].bindPipeline(vk::PipelineBindPoint::eGraphics,
-                                                  graphicsPipeline);
+        commandBuffers[currentFrame].beginRenderPass(
+            renderPassBeginInfo,
+            vk::SubpassContents::eInline
+        );
+        commandBuffers[currentFrame].bindPipeline(
+            vk::PipelineBindPoint::eGraphics,
+            graphicsPipeline
+        );
         commandBuffers[currentFrame].draw(3, 1, 0, 0);
         commandBuffers[currentFrame].endRenderPass();
         commandBuffers[currentFrame].end();
 
         std::array<vk::PipelineStageFlags, 1> waitStageMasks{
-            vk::PipelineStageFlagBits::eColorAttachmentOutput};
+            vk::PipelineStageFlagBits::eColorAttachmentOutput
+        };
         vk::SubmitInfo submitInfo;
         submitInfo.setWaitSemaphores(*imageAvailableSemaphores[currentFrame]);
         submitInfo.setWaitDstStageMask(waitStageMasks);
@@ -180,8 +189,11 @@ void Application::run() {
     device.waitIdle(); // Validation compliance.
 }
 
-vk::raii::Instance Application::createInstance(SDLContext const &sdlContext,
-                                               vk::raii::Context &vkContext, void *pNext) {
+vk::raii::Instance Application::createInstance(
+    SDLContext const &sdlContext,
+    vk::raii::Context &vkContext,
+    void *pNext
+) {
     vk::ApplicationInfo appInfo;
     appInfo.pApplicationName = appName1;
     appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
@@ -204,8 +216,10 @@ vk::raii::Instance Application::createInstance(SDLContext const &sdlContext,
     return vkContext.createInstance(createInfo);
 }
 
-vk::raii::RenderPass Application::createRenderPass(vk::raii::Device const &device,
-                                                   vk::SurfaceFormatKHR const &surfaceFormat) {
+vk::raii::RenderPass Application::createRenderPass(
+    vk::raii::Device const &device,
+    vk::SurfaceFormatKHR const &surfaceFormat
+) {
     vk::AttachmentDescription colorAttachment;
     colorAttachment.format = surfaceFormat.format;
     colorAttachment.samples = vk::SampleCountFlagBits::e1;
@@ -238,10 +252,12 @@ vk::raii::RenderPass Application::createRenderPass(vk::raii::Device const &devic
     return device.createRenderPass(renderPassCreateInfo);
 }
 
-vk::raii::Pipeline Application::createGraphicsPipeline(vk::raii::Device const &device,
-                                                       vk::Extent2D const &swapchainExtent,
-                                                       vk::raii::RenderPass const &renderPass,
-                                                       std::filesystem::path const &exeDir) {
+vk::raii::Pipeline Application::createGraphicsPipeline(
+    vk::raii::Device const &device,
+    vk::Extent2D const &swapchainExtent,
+    vk::raii::RenderPass const &renderPass,
+    std::filesystem::path const &exeDir
+) {
     auto vertexShaderCode = readFile(exeDir / "shader.vert.spv");
     auto vertexShader = createShaderModule(device, vertexShaderCode);
 
@@ -328,9 +344,11 @@ vk::raii::Pipeline Application::createGraphicsPipeline(vk::raii::Device const &d
     return device.createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
 }
 
-vk::raii::Device Application::createDevice(vk::raii::PhysicalDevice const &physicalDevice,
-                                           QueueFamilyIndexMap const &queueFamilyIndices,
-                                           std::span<char const *const> deviceExtensions) {
+vk::raii::Device Application::createDevice(
+    vk::raii::PhysicalDevice const &physicalDevice,
+    QueueFamilyIndexMap const &queueFamilyIndices,
+    std::span<char const *const> deviceExtensions
+) {
     vk::PhysicalDeviceFeatures deviceFeatures;
 
     auto uniqueQueueFamilyIndices =
@@ -377,16 +395,18 @@ std::vector<uint32_t> Application::readFile(std::filesystem::path const &filenam
     return fileContents;
 }
 
-vk::raii::ShaderModule Application::createShaderModule(vk::raii::Device const &device,
-                                                       std::vector<uint32_t> const &code) {
+vk::raii::ShaderModule
+Application::createShaderModule(vk::raii::Device const &device, std::vector<uint32_t> const &code) {
     vk::ShaderModuleCreateInfo createInfo;
     createInfo.setCode(code);
     return device.createShaderModule(createInfo);
 }
 
-std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap>
-Application::pickPhysicalDevice(vk::raii::Instance const &instance, vk::SurfaceKHR const &surface,
-                                std::span<char const *const> deviceExtensions) {
+std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> Application::pickPhysicalDevice(
+    vk::raii::Instance const &instance,
+    vk::SurfaceKHR const &surface,
+    std::span<char const *const> deviceExtensions
+) {
     auto physicalDevices = instance.enumeratePhysicalDevices();
 
     for (auto &physicalDevice : physicalDevices) {
@@ -416,8 +436,10 @@ Application::pickPhysicalDevice(vk::raii::Instance const &instance, vk::SurfaceK
 
         auto vExtensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
 
-        std::unordered_set<std::string> extensionChecklist{deviceExtensions.cbegin(),
-                                                           deviceExtensions.cend()};
+        std::unordered_set<std::string> extensionChecklist{
+            deviceExtensions.cbegin(),
+            deviceExtensions.cend(),
+        };
         for (auto const &extensionProperties : vExtensionProperties) {
             extensionChecklist.erase(extensionProperties.extensionName);
         }
@@ -425,9 +447,13 @@ Application::pickPhysicalDevice(vk::raii::Instance const &instance, vk::SurfaceK
             continue;
         }
 
-        return std::make_tuple(std::move(physicalDevice),
-                               QueueFamilyIndexMap{.graphicsFamily = graphicsFamily.value(),
-                                                   .presentFamily = presentFamily.value()});
+        return std::make_tuple(
+            std::move(physicalDevice),
+            QueueFamilyIndexMap{
+                .graphicsFamily = graphicsFamily.value(),
+                .presentFamily = presentFamily.value(),
+            }
+        );
     }
 
     throw std::runtime_error("No suitable GPU.");
