@@ -8,41 +8,38 @@
 #include <thread>
 #include <unordered_set>
 
-const std::array validationLayers1 {
+const std::array validationLayers1{
     "VK_LAYER_KHRONOS_validation",
 };
 
-const std::array deviceExtensions1 {
+const std::array deviceExtensions1{
     vk::KHRSwapchainExtensionName,
 };
 
-char const* const appName1 = "Hello Triangle";
+char const *const appName1 = "Hello Triangle";
 
 VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     vk::DebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
     vk::DebugUtilsMessageTypeFlagsEXT /*messageType*/,
-    vk::DebugUtilsMessengerCallbackDataEXT const* pCallbackData,
-    void* /*pUserData*/
+    vk::DebugUtilsMessengerCallbackDataEXT const *pCallbackData, void * /*pUserData*/
 ) {
-    std::cerr << "Validation layer message: " << pCallbackData->pMessage
-              << '\n';
+    std::cerr << "Validation layer message: " << pCallbackData->pMessage << '\n';
 
     return VK_FALSE;
 }
 
-Application::Application(std::filesystem::path const& exeDir) {
+Application::Application(std::filesystem::path const &exeDir) {
     sdlContext = SDLContext::getInstance();
 
     window = SDLWindow(appName1, 500, 500);
 
     vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-    debugCreateInfo.messageSeverity =
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
-        | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
-        | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning;
-    debugCreateInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
-        | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
-        | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
+    debugCreateInfo.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+                                      vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
+                                      vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning;
+    debugCreateInfo.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+                                  vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+                                  vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
     debugCreateInfo.pfnUserCallback = debugCallback;
 
     instance = createInstance(*sdlContext, vkContext, &debugCreateInfo);
@@ -54,25 +51,19 @@ Application::Application(std::filesystem::path const& exeDir) {
     std::tie(physicalDevice, queueFamilyIndices) =
         pickPhysicalDevice(instance, surface, deviceExtensions1);
 
-    device =
-        createDevice(physicalDevice, queueFamilyIndices, deviceExtensions1);
+    device = createDevice(physicalDevice, queueFamilyIndices, deviceExtensions1);
 
     graphicsQueue = device.getQueue(queueFamilyIndices.graphicsFamily, 0);
     presentQueue = device.getQueue(queueFamilyIndices.presentFamily, 0);
 
-    swapchainManager = SwapchainManager {*this};
+    swapchainManager = SwapchainManager{*this};
 
     renderPass = createRenderPass(device, swapchainManager.surfaceFormat);
 
-    graphicsPipeline = createGraphicsPipeline(
-        device,
-        swapchainManager.extent,
-        renderPass,
-        exeDir
-    );
+    graphicsPipeline = createGraphicsPipeline(device, swapchainManager.extent, renderPass, exeDir);
 
     framebuffers.reserve(swapchainManager.imageViews.size());
-    for (auto const& imageView : swapchainManager.imageViews) {
+    for (auto const &imageView : swapchainManager.imageViews) {
         vk::FramebufferCreateInfo createInfo;
         createInfo.renderPass = renderPass;
         createInfo.width = swapchainManager.extent.width;
@@ -85,10 +76,8 @@ Application::Application(std::filesystem::path const& exeDir) {
 
     commandPool = [this]() {
         vk::CommandPoolCreateInfo commandPoolCreateInfo;
-        commandPoolCreateInfo.flags =
-            vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
-        commandPoolCreateInfo.queueFamilyIndex =
-            queueFamilyIndices.graphicsFamily;
+        commandPoolCreateInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+        commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
 
         return device.createCommandPool(commandPoolCreateInfo);
     }();
@@ -110,12 +99,8 @@ Application::Application(std::filesystem::path const& exeDir) {
         vk::FenceCreateInfo fenceCreateInfo;
         fenceCreateInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
 
-        imageAvailableSemaphores.push_back(
-            device.createSemaphore(semaphoreCreateInfo)
-        );
-        renderFinishedSemaphores.push_back(
-            device.createSemaphore(semaphoreCreateInfo)
-        );
+        imageAvailableSemaphores.push_back(device.createSemaphore(semaphoreCreateInfo));
+        renderFinishedSemaphores.push_back(device.createSemaphore(semaphoreCreateInfo));
         inFlightFences.push_back(device.createFence(fenceCreateInfo));
     }
 }
@@ -125,11 +110,8 @@ void Application::run() {
     for (uint32_t currentFrame = 0; !done;
          currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT) {
         [[maybe_unused]]
-        auto _temp0 = device.waitForFences(
-            *inFlightFences[currentFrame],
-            true,
-            std::numeric_limits<uint64_t>::max()
-        );
+        auto _temp0 = device.waitForFences(*inFlightFences[currentFrame], true,
+                                           std::numeric_limits<uint64_t>::max());
         device.resetFences(*inFlightFences[currentFrame]);
 
         auto imageIndex = [&]() {
@@ -144,7 +126,7 @@ void Application::run() {
 
         commandBuffers[currentFrame].reset();
 
-        commandBuffers[currentFrame].begin(vk::CommandBufferBeginInfo {});
+        commandBuffers[currentFrame].begin(vk::CommandBufferBeginInfo{});
 
         vk::ClearValue clearColor;
         clearColor.setColor({0, 0, 0, 0});
@@ -152,25 +134,19 @@ void Application::run() {
         vk::RenderPassBeginInfo renderPassBeginInfo;
         renderPassBeginInfo.renderPass = renderPass;
         renderPassBeginInfo.framebuffer = framebuffers[imageIndex];
-        renderPassBeginInfo.renderArea =
-            vk::Rect2D {{0, 0}, swapchainManager.extent};
+        renderPassBeginInfo.renderArea = vk::Rect2D{{0, 0}, swapchainManager.extent};
         renderPassBeginInfo.setClearValues(clearColor);
 
-        commandBuffers[currentFrame].beginRenderPass(
-            renderPassBeginInfo,
-            vk::SubpassContents::eInline
-        );
-        commandBuffers[currentFrame].bindPipeline(
-            vk::PipelineBindPoint::eGraphics,
-            graphicsPipeline
-        );
+        commandBuffers[currentFrame].beginRenderPass(renderPassBeginInfo,
+                                                     vk::SubpassContents::eInline);
+        commandBuffers[currentFrame].bindPipeline(vk::PipelineBindPoint::eGraphics,
+                                                  graphicsPipeline);
         commandBuffers[currentFrame].draw(3, 1, 0, 0);
         commandBuffers[currentFrame].endRenderPass();
         commandBuffers[currentFrame].end();
 
-        std::array<vk::PipelineStageFlags, 1> waitStageMasks {
-            vk::PipelineStageFlagBits::eColorAttachmentOutput
-        };
+        std::array<vk::PipelineStageFlags, 1> waitStageMasks{
+            vk::PipelineStageFlagBits::eColorAttachmentOutput};
         vk::SubmitInfo submitInfo;
         submitInfo.setWaitSemaphores(*imageAvailableSemaphores[currentFrame]);
         submitInfo.setWaitDstStageMask(waitStageMasks);
@@ -204,11 +180,8 @@ void Application::run() {
     device.waitIdle(); // Validation compliance.
 }
 
-vk::raii::Instance Application::createInstance(
-    SDLContext const& sdlContext,
-    vk::raii::Context& vkContext,
-    void* pNext
-) {
+vk::raii::Instance Application::createInstance(SDLContext const &sdlContext,
+                                               vk::raii::Context &vkContext, void *pNext) {
     vk::ApplicationInfo appInfo;
     appInfo.pApplicationName = appName1;
     appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
@@ -217,14 +190,11 @@ vk::raii::Instance Application::createInstance(
     appInfo.apiVersion = VK_API_VERSION_1_3;
 
     auto sdlExtensions = sdlContext.getInstanceExtensions();
-    std::vector<char const*> instanceExtensions(
-        sdlExtensions.cbegin(),
-        sdlExtensions.cend()
-    );
+    std::vector<char const *> instanceExtensions(sdlExtensions.cbegin(), sdlExtensions.cend());
     instanceExtensions.push_back("VK_EXT_debug_utils");
     instanceExtensions.push_back("VK_KHR_portability_enumeration");
 
-    vk::InstanceCreateInfo createInfo {};
+    vk::InstanceCreateInfo createInfo{};
     createInfo.pApplicationInfo = &appInfo;
     createInfo.pNext = pNext;
     createInfo.flags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
@@ -234,10 +204,8 @@ vk::raii::Instance Application::createInstance(
     return vkContext.createInstance(createInfo);
 }
 
-vk::raii::RenderPass Application::createRenderPass(
-    vk::raii::Device const& device,
-    vk::SurfaceFormatKHR const& surfaceFormat
-) {
+vk::raii::RenderPass Application::createRenderPass(vk::raii::Device const &device,
+                                                   vk::SurfaceFormatKHR const &surfaceFormat) {
     vk::AttachmentDescription colorAttachment;
     colorAttachment.format = surfaceFormat.format;
     colorAttachment.samples = vk::SampleCountFlagBits::e1;
@@ -248,10 +216,7 @@ vk::raii::RenderPass Application::createRenderPass(
     colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
     colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
-    vk::AttachmentReference colorAttachmentRef {
-        0,
-        vk::ImageLayout::eColorAttachmentOptimal
-    };
+    vk::AttachmentReference colorAttachmentRef{0, vk::ImageLayout::eColorAttachmentOptimal};
 
     vk::SubpassDescription subpass;
     subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
@@ -260,11 +225,9 @@ vk::raii::RenderPass Application::createRenderPass(
     vk::SubpassDependency subpassDependency;
     subpassDependency.srcSubpass = vk::SubpassExternal;
     subpassDependency.dstSubpass = 0;
-    subpassDependency.srcStageMask =
-        vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    subpassDependency.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     subpassDependency.srcAccessMask = vk::AccessFlagBits::eNone;
-    subpassDependency.dstStageMask =
-        vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    subpassDependency.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     subpassDependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
 
     vk::RenderPassCreateInfo renderPassCreateInfo;
@@ -275,12 +238,10 @@ vk::raii::RenderPass Application::createRenderPass(
     return device.createRenderPass(renderPassCreateInfo);
 }
 
-vk::raii::Pipeline Application::createGraphicsPipeline(
-    vk::raii::Device const& device,
-    vk::Extent2D const& swapchainExtent,
-    vk::raii::RenderPass const& renderPass,
-    std::filesystem::path const& exeDir
-) {
+vk::raii::Pipeline Application::createGraphicsPipeline(vk::raii::Device const &device,
+                                                       vk::Extent2D const &swapchainExtent,
+                                                       vk::raii::RenderPass const &renderPass,
+                                                       std::filesystem::path const &exeDir) {
     auto vertexShaderCode = readFile(exeDir / "shader.vert.spv");
     auto vertexShader = createShaderModule(device, vertexShaderCode);
 
@@ -305,9 +266,7 @@ vk::raii::Pipeline Application::createGraphicsPipeline(
     vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo;
 
     vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo;
-    inputAssemblyStateCreateInfo.setTopology(
-        vk::PrimitiveTopology::eTriangleList
-    );
+    inputAssemblyStateCreateInfo.setTopology(vk::PrimitiveTopology::eTriangleList);
     inputAssemblyStateCreateInfo.setPrimitiveRestartEnable(false);
 
     vk::Viewport viewport;
@@ -318,7 +277,7 @@ vk::raii::Pipeline Application::createGraphicsPipeline(
     viewport.minDepth = 0.0;
     viewport.maxDepth = 1.0;
 
-    vk::Rect2D scissor {{0, 0}, swapchainExtent};
+    vk::Rect2D scissor{{0, 0}, swapchainExtent};
 
     vk::PipelineViewportStateCreateInfo viewportStateCreateInfo;
     viewportStateCreateInfo.setViewports(viewport);
@@ -337,9 +296,8 @@ vk::raii::Pipeline Application::createGraphicsPipeline(
     multisampleStateCreateInfo.sampleShadingEnable = false;
 
     vk::PipelineColorBlendAttachmentState colorBlending;
-    colorBlending.colorWriteMask = vk::ColorComponentFlagBits::eR
-        | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB
-        | vk::ColorComponentFlagBits::eA;
+    colorBlending.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+                                   vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
     colorBlending.blendEnable = false;
     colorBlending.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
     colorBlending.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
@@ -353,17 +311,14 @@ vk::raii::Pipeline Application::createGraphicsPipeline(
     colorBlendStateCreateInfo.logicOp = vk::LogicOp::eCopy;
     colorBlendStateCreateInfo.setAttachments(colorBlending);
 
-    auto pipelineLayout =
-        device.createPipelineLayout(vk::PipelineLayoutCreateInfo {});
+    auto pipelineLayout = device.createPipelineLayout(vk::PipelineLayoutCreateInfo{});
 
     vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
     graphicsPipelineCreateInfo.setStages(shaderStages);
     graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
-    graphicsPipelineCreateInfo.pInputAssemblyState =
-        &inputAssemblyStateCreateInfo;
+    graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
     graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
-    graphicsPipelineCreateInfo.pRasterizationState =
-        &rasterizationStateCreateInfo;
+    graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
     graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
     graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
     graphicsPipelineCreateInfo.layout = pipelineLayout;
@@ -373,11 +328,9 @@ vk::raii::Pipeline Application::createGraphicsPipeline(
     return device.createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
 }
 
-vk::raii::Device Application::createDevice(
-    vk::raii::PhysicalDevice const& physicalDevice,
-    QueueFamilyIndexMap const& queueFamilyIndices,
-    std::span<char const* const> deviceExtensions
-) {
+vk::raii::Device Application::createDevice(vk::raii::PhysicalDevice const &physicalDevice,
+                                           QueueFamilyIndexMap const &queueFamilyIndices,
+                                           std::span<char const *const> deviceExtensions) {
     vk::PhysicalDeviceFeatures deviceFeatures;
 
     auto uniqueQueueFamilyIndices =
@@ -401,16 +354,14 @@ vk::raii::Device Application::createDevice(
     return physicalDevice.createDevice(createInfo);
 }
 
-std::vector<uint32_t>
-Application::readFile(std::filesystem::path const& filename) {
+std::vector<uint32_t> Application::readFile(std::filesystem::path const &filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open file!");
     }
 
     size_t size = file.tellg();
-    if (size % sizeof(uint32_t)
-        != 0) { // Will make this more robust as necessary.
+    if (size % sizeof(uint32_t) != 0) { // Will make this more robust as necessary.
         throw std::runtime_error("File size is not a multiple of uint32_t!");
     }
 
@@ -418,7 +369,7 @@ Application::readFile(std::filesystem::path const& filename) {
 
     std::vector<uint32_t> fileContents;
     fileContents.resize(size / 4);
-    file.read(reinterpret_cast<char*>(fileContents.data()), size);
+    file.read(reinterpret_cast<char *>(fileContents.data()), size);
     if (!file) {
         throw std::runtime_error("Error reading file!");
     }
@@ -426,29 +377,23 @@ Application::readFile(std::filesystem::path const& filename) {
     return fileContents;
 }
 
-vk::raii::ShaderModule Application::createShaderModule(
-    vk::raii::Device const& device,
-    std::vector<uint32_t> const& code
-) {
+vk::raii::ShaderModule Application::createShaderModule(vk::raii::Device const &device,
+                                                       std::vector<uint32_t> const &code) {
     vk::ShaderModuleCreateInfo createInfo;
     createInfo.setCode(code);
     return device.createShaderModule(createInfo);
 }
 
 std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap>
-Application::pickPhysicalDevice(
-    vk::raii::Instance const& instance,
-    vk::SurfaceKHR const& surface,
-    std::span<char const* const> deviceExtensions
-) {
+Application::pickPhysicalDevice(vk::raii::Instance const &instance, vk::SurfaceKHR const &surface,
+                                std::span<char const *const> deviceExtensions) {
     auto physicalDevices = instance.enumeratePhysicalDevices();
 
-    for (auto& physicalDevice : physicalDevices) {
+    for (auto &physicalDevice : physicalDevices) {
         auto vFamilyProperties = physicalDevice.getQueueFamilyProperties();
 
         std::optional<uint32_t> graphicsFamily;
-        for (const auto [i, familyProperties] :
-             std::views::enumerate(vFamilyProperties)) {
+        for (const auto [i, familyProperties] : std::views::enumerate(vFamilyProperties)) {
             if (familyProperties.queueFlags & vk::QueueFlagBits::eGraphics) {
                 graphicsFamily = i;
                 break;
@@ -459,8 +404,7 @@ Application::pickPhysicalDevice(
         }
 
         std::optional<uint32_t> presentFamily;
-        for (const auto [i, familyProperties] :
-             std::views::enumerate(vFamilyProperties)) {
+        for (const auto [i, familyProperties] : std::views::enumerate(vFamilyProperties)) {
             if (physicalDevice.getSurfaceSupportKHR(i, surface)) {
                 presentFamily = i;
                 break;
@@ -470,27 +414,20 @@ Application::pickPhysicalDevice(
             continue;
         }
 
-        auto vExtensionProperties =
-            physicalDevice.enumerateDeviceExtensionProperties();
+        auto vExtensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
 
-        std::unordered_set<std::string> extensionChecklist {
-            deviceExtensions.cbegin(),
-            deviceExtensions.cend()
-        };
-        for (auto const& extensionProperties : vExtensionProperties) {
+        std::unordered_set<std::string> extensionChecklist{deviceExtensions.cbegin(),
+                                                           deviceExtensions.cend()};
+        for (auto const &extensionProperties : vExtensionProperties) {
             extensionChecklist.erase(extensionProperties.extensionName);
         }
         if (!extensionChecklist.empty()) {
             continue;
         }
 
-        return std::make_tuple(
-            std::move(physicalDevice),
-            QueueFamilyIndexMap {
-                .graphicsFamily = graphicsFamily.value(),
-                .presentFamily = presentFamily.value()
-            }
-        );
+        return std::make_tuple(std::move(physicalDevice),
+                               QueueFamilyIndexMap{.graphicsFamily = graphicsFamily.value(),
+                                                   .presentFamily = presentFamily.value()});
     }
 
     throw std::runtime_error("No suitable GPU.");

@@ -8,7 +8,7 @@
 #include <iostream>
 
 class App {
-    GLFWwindow* window;
+    GLFWwindow *window;
 
 public:
     void run() {
@@ -37,13 +37,12 @@ private:
             auto loopTime = std::chrono::high_resolution_clock::now();
 
             auto deltaTime =
-                std::chrono::duration_cast<std::chrono::duration<float>>(
-                    lastLoopTime - lastPrintTime
-                )
-                    .count();
+                std::chrono::duration_cast<std::chrono::duration<float>>(lastLoopTime - loopTime);
 
-            if (deltaTime >= 1.0) {
-                std::cout << "FPS: " << 1.0 / deltaTime << std::endl;
+            if (std::chrono::duration_cast<std::chrono::duration<float>>(lastLoopTime -
+                                                                         lastPrintTime)
+                    .count() >= 1.0) {
+                std::cout << "FPS: " << 1.0 / deltaTime.count() << std::endl;
                 lastPrintTime = lastLoopTime;
             }
 
@@ -63,7 +62,7 @@ int main() {
 
     try {
         app.run();
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
     }
@@ -77,11 +76,5 @@ void App::initWindow() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(
-        500,
-        500,
-        "Window Title Placeholder",
-        nullptr,
-        nullptr
-    );
+    window = glfwCreateWindow(500, 500, "Window Title Placeholder", nullptr, nullptr);
 }

@@ -17,12 +17,12 @@
 
 // https://github.com/microsoft/vscode-cpptools/issues/10696
 #ifdef __INTELLISENSE__
-    #define bool _Bool
-    #define true 1
-    #define false 0
+#define bool _Bool
+#define true 1
+#define false 0
 #endif
 
-int main(int /*argc*/, const char** /*argv*/) {
+int main(int /*argc*/, const char ** /*argv*/) {
     // NOTE: All of the flushing is for if the program segfaults.
 
     printf("Initializing CleanupStack...");
@@ -38,7 +38,7 @@ int main(int /*argc*/, const char** /*argv*/) {
     printf(" Done.\nAllocating int...");
     fflush(stdout);
 
-    int* ohNoA = malloc(sizeof(int));
+    int *ohNoA = malloc(sizeof(int));
     if (!CleanupStackPushMalloc(&cleanupStack, ohNoA)) {
         printf("Failed to add a resource to the CleanupStack!\n");
         fflush(stdout);

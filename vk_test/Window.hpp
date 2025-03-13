@@ -7,11 +7,11 @@ struct Window {
 
     virtual ~Window() = 0;
 
-    Window(Window const&) = delete;
-    Window& operator=(Window const&) = delete;
+    Window(Window const &) = delete;
+    Window &operator=(Window const &) = delete;
 
-    Window(Window&&) = default;
-    Window& operator=(Window&&) = default;
+    Window(Window &&) = default;
+    Window &operator=(Window &&) = default;
 
     virtual VkExtent2D queryExtent() const = 0;
 };
