@@ -3,7 +3,7 @@
 #include <vulkan/vulkan_core.h>
 
 struct Window {
-  Window() {}
+  constexpr Window() {}
   virtual ~Window() = 0;
 
   Window(Window const&) = delete;
@@ -15,4 +15,4 @@ struct Window {
   virtual VkExtent2D queryExtent() const = 0;
 };
 
-inline Window::~Window() {}
+constexpr Window::~Window() {}
