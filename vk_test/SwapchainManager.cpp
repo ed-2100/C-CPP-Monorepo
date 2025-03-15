@@ -74,8 +74,8 @@ void SwapchainManager::recreateSwapchain() {
     createSwapchain(oldSwapchain);
 }
 
-vk::Extent2D
-SwapchainManager::chooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const &surfaceCapabilities
+vk::Extent2D SwapchainManager::chooseSwapchainExtent(
+    vk::SurfaceCapabilitiesKHR const &surfaceCapabilities
 ) const {
     if (surfaceCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return surfaceCapabilities.currentExtent;
