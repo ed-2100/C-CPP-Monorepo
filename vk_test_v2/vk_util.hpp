@@ -1,14 +1,15 @@
 #pragma once
 
-#include <vulkan/vulkan_raii.hpp>
+#include <optional>
+#include <stdexcept>
 
-#include <SDL3/SDL_error.h>
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_video.h>
+namespace vkutil {
 
 // Probably the most baller `todo!()` implementation there ever was.
 struct TODO {
-    [[noreturn]] TODO() { throw std::logic_error("TODO: Not implemented!"); }
+    [[noreturn]] TODO() {
+        throw std::logic_error("TODO: Not implemented!");
+    }
 
     template <typename T> [[noreturn]] operator T() const {
         throw std::logic_error("TODO: This should be unreachable.");
@@ -22,3 +23,5 @@ template <typename T> inline T expect(std::optional<T> wrapped, char const *msg)
 
     return wrapped.value();
 }
+
+} // namespace vkutil

@@ -19,5 +19,13 @@ add_custom_target(${SHADER_TARGET} DEPENDS ${SPV_FILES})
 
 add_executable(${MODULE_NAME})
 target_sources(${MODULE_NAME} PRIVATE ${SOURCES})
-target_link_libraries(${MODULE_NAME} PRIVATE vulkan glfw)
+target_link_libraries(
+    ${MODULE_NAME}
+    PRIVATE
+        vulkan
+        SDL3
+        vk-bootstrap::vk-bootstrap
+        GPUOpen::VulkanMemoryAllocator
+        magic_enum
+)
 add_dependencies(${MODULE_NAME} ${SHADER_TARGET})

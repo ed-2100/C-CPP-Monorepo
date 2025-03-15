@@ -19,11 +19,32 @@ include(FetchContent)
 
 # Fetch SFML from GitHub.
 FetchContent_Declare(
-    SFML
+    Fetch_SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
     GIT_TAG 3.0.0
 )
-FetchContent_MakeAvailable(SFML)
+FetchContent_MakeAvailable(Fetch_SFML)
+
+FetchContent_Declare(
+    Fetch_VulkanMemoryAllocator
+    GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+    GIT_TAG v3.2.1
+)
+FetchContent_MakeAvailable(Fetch_VulkanMemoryAllocator)
+
+FetchContent_Declare(
+    Fetch_vk_bootstrap
+    GIT_REPOSITORY https://github.com/charles-lunarg/vk-bootstrap.git
+    GIT_TAG v1.4.310
+)
+FetchContent_MakeAvailable(Fetch_vk_bootstrap)
+
+FetchContent_Declare(
+    magic_enum
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
+    GIT_TAG v0.9.7
+)
+FetchContent_MakeAvailable(magic_enum)
 
 find_package(SDL3 REQUIRED)
 find_package(Vulkan REQUIRED)
