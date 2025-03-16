@@ -8,20 +8,23 @@
 
 namespace vke {
 
-struct InstanceInner {
+class InstanceInner {
     VkInstance instance;
     VkDebugUtilsMessengerEXT debug_messenger;
     PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
-
-    InstanceInner() = delete;
-    InstanceInner(VkInstance instance, VkDebugUtilsMessengerEXT debug_messenger);
-    ~InstanceInner() noexcept;
 
     InstanceInner(const InstanceInner&) = delete;
     InstanceInner& operator=(const InstanceInner&) = delete;
 
     InstanceInner(InstanceInner&&) = delete;
     InstanceInner& operator=(InstanceInner&&) = delete;
+
+public:
+    InstanceInner() = delete;
+    InstanceInner(VkInstance instance, VkDebugUtilsMessengerEXT debug_messenger);
+    ~InstanceInner() noexcept;
+
+    inline operator VkInstance() { return instance; }
 };
 
 class Instance {
@@ -29,13 +32,9 @@ class Instance {
 
 public:
     Instance() = delete;
-    Instance(std::shared_ptr<InstanceInner> inner) : inner(inner) {
-        assert(inner);
-    }
+    Instance(std::shared_ptr<InstanceInner> inner) : inner(inner) { assert(inner); }
 
-    operator VkInstance() {
-        return inner->instance;
-    }
+    inline operator VkInstance() { return *inner; }
 };
 
 class InstanceBuilder {

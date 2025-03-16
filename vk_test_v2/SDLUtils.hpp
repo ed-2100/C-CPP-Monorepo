@@ -3,6 +3,7 @@
 #include "VulkanUtils.hpp"
 
 #include <SDL3/SDL_video.h>
+#include <vulkan/vulkan_core.h>
 
 #include <memory>
 
@@ -10,15 +11,16 @@ namespace vke {
 
 // ----- SDLContext -----
 
-struct SDLContextInner {
-    SDLContextInner();
-    ~SDLContextInner();
-
+class SDLContextInner {
     SDLContextInner(SDLContextInner const&) = delete;
     SDLContextInner& operator=(SDLContextInner const&) = delete;
 
     SDLContextInner(SDLContextInner&&) = delete;
     SDLContextInner& operator=(SDLContextInner&&) = delete;
+
+public:
+    SDLContextInner();
+    ~SDLContextInner();
 
     static std::shared_ptr<SDLContextInner> getInstance();
 };
@@ -29,20 +31,14 @@ class SDLContext {
 public:
     SDLContext();
 
-    constexpr SDLContextInner& operator*() {
-        return *inner;
-    }
-
     std::span<char const* const> getInstanceExtensions() const;
 };
 
 // ----- SDLWindow -----
 
-struct SDLWindowInner {
-    SDLWindowInner() = delete;
-    constexpr SDLWindowInner(SDLContext sdl_context, SDL_Window* handle)
-        : sdl_context(sdl_context), handle(handle) {}
-    ~SDLWindowInner();
+class SDLWindowInner {
+    SDLContext sdl_context;
+    SDL_Window* handle;
 
     SDLWindowInner(SDLWindowInner&) = delete;
     SDLWindowInner& operator=(SDLWindowInner&) = delete;
@@ -50,30 +46,35 @@ struct SDLWindowInner {
     SDLWindowInner(SDLWindowInner&&) = delete;
     SDLWindowInner& operator=(SDLWindowInner&&) = delete;
 
-    SDLContext sdl_context;
-    SDL_Window* handle;
+public:
+    SDLWindowInner() = delete;
+    SDLWindowInner(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h);
+    ~SDLWindowInner();
+
+    inline operator SDL_Window*() const { return handle; }
+
+    VkExtent2D queryExtent() const;
 };
 
 class SDLWindow {
     std::shared_ptr<SDLWindowInner> inner;
 
 public:
-    SDLWindow(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h);
+    SDLWindow() = delete;
+    SDLWindow(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h)
+        : inner(std::make_shared<SDLWindowInner>(sdl_context, name, w, h)) {}
 
-    constexpr operator SDL_Window*() const {
-        return inner->handle;
-    }
+    inline operator SDL_Window*() const { return *inner; }
 
-    VkExtent2D queryExtent() const;
+    inline VkExtent2D queryExtent() const { return inner->queryExtent(); }
 };
 
 // ----- SDLSurface -----
 
-struct SDLSurfaceInner {
-    SDLSurfaceInner() = delete;
-    constexpr SDLSurfaceInner(SDLWindow window, Instance instance, VkSurfaceKHR surface)
-        : window(window), instance(instance), surface(surface) {}
-    ~SDLSurfaceInner();
+class SDLSurfaceInner {
+    SDLWindow window;
+    Instance instance;
+    VkSurfaceKHR surface;
 
     SDLSurfaceInner(SDLSurfaceInner&) = delete;
     SDLSurfaceInner& operator=(SDLSurfaceInner&) = delete;
@@ -81,9 +82,12 @@ struct SDLSurfaceInner {
     SDLSurfaceInner(SDLSurfaceInner&&) = delete;
     SDLSurfaceInner& operator=(SDLSurfaceInner&&) = delete;
 
-    SDLWindow window;
-    Instance instance;
-    VkSurfaceKHR surface;
+public:
+    SDLSurfaceInner() = delete;
+    SDLSurfaceInner(SDLWindow window, Instance instance);
+    ~SDLSurfaceInner();
+
+    inline operator VkSurfaceKHR() const { return surface; }
 };
 
 class SDLSurface {
@@ -91,11 +95,10 @@ class SDLSurface {
 
 public:
     SDLSurface() = delete;
-    SDLSurface(SDLWindow window, Instance instance);
+    SDLSurface(SDLWindow window, Instance instance)
+        : inner(std::make_shared<SDLSurfaceInner>(window, instance)) {}
 
-    constexpr operator VkSurfaceKHR() const {
-        return inner->surface;
-    }
+    inline operator VkSurfaceKHR() const { return *inner; }
 };
 
 }  // namespace vke

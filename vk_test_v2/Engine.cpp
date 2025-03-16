@@ -19,7 +19,7 @@ VulkanEngine::VulkanEngine() {
     inner = std::make_shared<VulkanEngineInner>(sdl_context, window, instance, surface);
 }
 
-void VulkanEngine::run() {
+void VulkanEngineInner::run() {
     std::cout << "Running." << std::endl;
 
     std::cout << "Stopped." << std::endl;

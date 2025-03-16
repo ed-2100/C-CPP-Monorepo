@@ -28,6 +28,8 @@ public:
         SDLSurface surface
     )
         : sdl_context(sdl_context), window(window), instance(instance), surface(surface) {}
+
+    void run();
 };
 
 class VulkanEngine {
@@ -36,11 +38,9 @@ class VulkanEngine {
 public:
     VulkanEngine();
 
-    constexpr VulkanEngineInner& operator*() {
-        return *inner;
-    }
+    inline VulkanEngineInner& operator*() { return *inner; }
 
-    void run();
+    inline void run() { return inner->run(); }
 };
 
 }  // namespace vke
