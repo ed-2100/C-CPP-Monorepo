@@ -1,17 +1,24 @@
-#include <cstring>
-#include <vulkan/vulkan.h>
+#include "Engine.hpp"
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include <iostream>
 
-#include <cstdlib>
+int main(int argc, char* argv[]) {
+    try {
+        std::cout << "Initializing." << std::endl;
 
-#include "vk_engine.hpp"
+        auto engine = vke::VulkanEngine();
 
-int main(int argc, char *argv[]) {
-    auto engine = VulkanEngine();
+        std::cout << "Initialized." << std::endl;
 
-    engine.run();
+        engine.run();
 
+        std::cout << "Deinitializing." << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << std::format("Caught {}: {}", typeid(e).name(), e.what());
+    } catch (...) {
+        std::cerr << "Unknown Exception";
+    }
+
+    std::cout << "Deinitialized." << std::endl;
     return 0;
 }

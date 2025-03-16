@@ -39,17 +39,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Fetch_vk_bootstrap)
 
-FetchContent_Declare(
-    magic_enum
-    GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
-    GIT_TAG v0.9.7
-)
-FetchContent_MakeAvailable(magic_enum)
-
 find_package(SDL3 REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
-# find_package(glm REQUIRED)
+find_package(glm REQUIRED)
 
 add_subdirectory(cleanup_stack)
 add_subdirectory(game_of_life)

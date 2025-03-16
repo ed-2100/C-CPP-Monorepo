@@ -26,6 +26,5 @@ target_link_libraries(
         SDL3
         vk-bootstrap::vk-bootstrap
         GPUOpen::VulkanMemoryAllocator
-        magic_enum
 )
 add_dependencies(${MODULE_NAME} ${SHADER_TARGET})
