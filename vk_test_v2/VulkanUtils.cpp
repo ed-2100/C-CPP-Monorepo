@@ -1,17 +1,6 @@
 #include "VulkanUtils.hpp"
-
+#include <vulkan/vulkan_core.h>
 #include <iostream>
-
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT messageType,
-    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-    void* pUserData
-) {
-    std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
-
-    return VK_FALSE;
-}
 
 static void checkResult(VkResult result) {
     if (result) {
@@ -25,23 +14,19 @@ namespace vke {
 
 // ----- Instance -----
 
-InstanceInner::InstanceInner(VkInstance instance, VkDebugUtilsMessengerEXT debug_messenger)
-    : instance(instance),
-      debug_messenger(debug_messenger),
-      vkDestroyDebugUtilsMessengerEXT((PFN_vkDestroyDebugUtilsMessengerEXT
-      )vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT")) {
-    assert(instance);
+InstanceInner::InstanceInner(const VkInstanceCreateInfo& create_info)
+    : instance([&create_info]() {
+          VkInstance instance;
+          checkResult(vkCreateInstance(&create_info, nullptr, &instance));
 
-    if (!vkDestroyDebugUtilsMessengerEXT) {
-        checkResult(VK_ERROR_EXTENSION_NOT_PRESENT);
-    }
-}
+          return instance;
+      }()),
+      vkCreateDebugUtilsMessengerEXT((PFN_vkCreateDebugUtilsMessengerEXT
+      )vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT")),
+      vkDestroyDebugUtilsMessengerEXT((PFN_vkDestroyDebugUtilsMessengerEXT
+      )vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT")) {}
 
 InstanceInner::~InstanceInner() {
-    if (debug_messenger) {
-        vkDestroyDebugUtilsMessengerEXT(instance, debug_messenger, nullptr);
-    }
-
     vkDestroyInstance(instance, nullptr);
 }
 
@@ -55,22 +40,6 @@ Instance InstanceBuilder::build() {
         .apiVersion = VK_API_VERSION_1_4,
     };
 
-    auto debug_create_info = VkDebugUtilsMessengerCreateInfoEXT{
-        .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-        .pNext = pNext,
-        .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                           VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                           VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-        .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                       VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                       VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-        .pfnUserCallback = debugCallback,
-    };
-
-    if (validation_layers) {
-        pNext = &debug_create_info;
-    }
-
     auto create_info = VkInstanceCreateInfo{
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = pNext,
@@ -81,26 +50,7 @@ Instance InstanceBuilder::build() {
         .ppEnabledExtensionNames = extensions.data(),
     };
 
-    VkInstance instance;
-    checkResult(vkCreateInstance(&create_info, nullptr, &instance));
-
-    VkDebugUtilsMessengerEXT debug_messenger = nullptr;
-    if (validation_layers) {
-        debug_create_info.pNext = nullptr;
-
-        auto vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT
-        )vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-
-        if (!vkCreateDebugUtilsMessengerEXT) {
-            checkResult(VK_ERROR_EXTENSION_NOT_PRESENT);
-        }
-
-        checkResult(
-            vkCreateDebugUtilsMessengerEXT(instance, &debug_create_info, nullptr, &debug_messenger)
-        );
-    }
-
-    return std::make_shared<InstanceInner>(instance, debug_messenger);
+    return std::make_shared<InstanceInner>(create_info);
 }
 
 InstanceBuilder& InstanceBuilder::with_validation_layers() {
@@ -122,6 +72,31 @@ InstanceBuilder& InstanceBuilder::with_layers(std::span<const char* const> layer
         this->layers.push_back(layer);
     }
     return *this;
+}
+
+DebugUtilsMessengerEXTInner::DebugUtilsMessengerEXTInner(
+    Instance instance,
+    const VkDebugUtilsMessengerCreateInfoEXT& create_info
+)
+    : instance(instance), debug_messenger([&instance, &create_info]() {
+          if (!instance->vkCreateDebugUtilsMessengerEXT ||
+              !instance->vkDestroyDebugUtilsMessengerEXT) {
+              checkResult(VK_ERROR_EXTENSION_NOT_PRESENT);
+          }
+
+          VkDebugUtilsMessengerEXT debug_messenger;
+          checkResult(instance->vkCreateDebugUtilsMessengerEXT(
+              instance,
+              &create_info,
+              nullptr,
+              &debug_messenger
+          ));
+
+          return debug_messenger;
+      }()) {}
+
+DebugUtilsMessengerEXTInner::~DebugUtilsMessengerEXTInner() {
+    instance->vkDestroyDebugUtilsMessengerEXT(instance, debug_messenger, nullptr);
 }
 
 }  // namespace vke

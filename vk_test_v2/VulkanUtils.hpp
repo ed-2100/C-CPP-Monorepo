@@ -10,8 +10,6 @@ namespace vke {
 
 class InstanceInner {
     const VkInstance instance;
-    const VkDebugUtilsMessengerEXT debug_messenger;
-    const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
 
     InstanceInner(const InstanceInner&) = delete;
     InstanceInner& operator=(const InstanceInner&) = delete;
@@ -21,8 +19,11 @@ class InstanceInner {
 
 public:
     InstanceInner() = delete;
-    InstanceInner(VkInstance instance, VkDebugUtilsMessengerEXT debug_messenger);
+    InstanceInner(const VkInstanceCreateInfo&);
     ~InstanceInner();
+
+    const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
+    const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
 
     inline operator VkInstance() const { return instance; }
 };
@@ -34,6 +35,8 @@ public:
     Instance() = delete;
     inline Instance(std::shared_ptr<InstanceInner> inner) : inner(inner) { assert(inner); }
 
+    inline InstanceInner* operator->() const { return &(*inner); }
+
     inline operator VkInstance() const { return *inner; }
 };
 
@@ -42,7 +45,7 @@ class InstanceBuilder {
     std::vector<const char*> layers;
     std::vector<const char*> extensions;
 
-    const void* pNext = nullptr;
+    void* pNext = nullptr;
 
 public:
     inline InstanceBuilder() {}
@@ -52,6 +55,42 @@ public:
     InstanceBuilder& with_validation_layers();
     InstanceBuilder& with_extensions(std::span<const char* const> extensions);
     InstanceBuilder& with_layers(std::span<const char* const> layers);
+
+    template <typename T>
+    inline InstanceBuilder& push_pNext(T* to_push) {
+        to_push->pNext = pNext;
+        pNext = to_push;
+        return *this;
+    }
+};
+
+class DebugUtilsMessengerEXTInner {
+    const Instance instance;
+    const VkDebugUtilsMessengerEXT debug_messenger;
+
+public:
+    DebugUtilsMessengerEXTInner() = delete;
+    DebugUtilsMessengerEXTInner(
+        Instance instance,
+        const VkDebugUtilsMessengerCreateInfoEXT& create_info
+    );
+    ~DebugUtilsMessengerEXTInner();
+
+    inline operator VkDebugUtilsMessengerEXT() const { return debug_messenger; }
+};
+
+class DebugUtilsMessengerEXT {
+    const std::shared_ptr<DebugUtilsMessengerEXTInner> inner;
+
+public:
+    DebugUtilsMessengerEXT() = delete;
+    inline DebugUtilsMessengerEXT(
+        Instance instance,
+        const VkDebugUtilsMessengerCreateInfoEXT& create_info
+    )
+        : inner(std::make_shared<DebugUtilsMessengerEXTInner>(instance, create_info)) {}
+
+    inline operator VkDebugUtilsMessengerEXT() const { return *inner; }
 };
 
 }  // namespace vke
