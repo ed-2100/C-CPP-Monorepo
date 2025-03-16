@@ -1,3 +1,4 @@
+BasedOnStyle: Chromium
 AccessModifierOffset: -4
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4

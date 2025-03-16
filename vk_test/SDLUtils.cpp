@@ -27,9 +27,9 @@ std::shared_ptr<SDLContext> SDLContext::getInstance() {
     return sharedInstance;
 }
 
-std::span<char const *const> SDLContext::getInstanceExtensions() const {
+std::span<char const* const> SDLContext::getInstanceExtensions() const {
     uint32_t sdlExtensionCount;
-    char const *const *sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+    char const* const* sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
     if (nullptr == sdlExtensions) {
         throw std::runtime_error(
             std::string("Failed to get SDL's required extensions: ") + SDL_GetError()
@@ -38,7 +38,7 @@ std::span<char const *const> SDLContext::getInstanceExtensions() const {
     return std::span(sdlExtensions, sdlExtensionCount);
 }
 
-SDLWindow::SDLWindow(char const *name, uint32_t w, uint32_t h) {
+SDLWindow::SDLWindow(char const* name, uint32_t w, uint32_t h) {
     handle = SDL_CreateWindow(name, w, h, SDL_WINDOW_VULKAN);
 }
 
@@ -48,7 +48,7 @@ SDLWindow::~SDLWindow() {
     }
 }
 
-SDLSurface::SDLSurface(SDLWindow const &window, vk::Instance instance)
+SDLSurface::SDLSurface(SDLWindow const& window, vk::Instance instance)
     : Surface(createSurface(window, instance)), instance(instance) {}
 
 SDLSurface::~SDLSurface() {
@@ -57,7 +57,7 @@ SDLSurface::~SDLSurface() {
     }
 }
 
-vk::SurfaceKHR SDLSurface::createSurface(SDLWindow const &window, vk::Instance instance) {
+vk::SurfaceKHR SDLSurface::createSurface(SDLWindow const& window, vk::Instance instance) {
     VkSurfaceKHR surface;
     if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {
         throw std::runtime_error(std::string("Failed to create surface: ") + SDL_GetError());

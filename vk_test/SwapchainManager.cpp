@@ -7,7 +7,7 @@
 #include <unordered_set>
 
 vk::SurfaceFormatKHR SwapchainManager::chooseSurfaceFormat() const {
-    for (auto const &availableFormat :
+    for (auto const& availableFormat :
          renderer->physicalDevice.getSurfaceFormatsKHR(renderer->surface)) {
         if (availableFormat.format == vk::Format::eB8G8R8A8Srgb &&
             availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
@@ -54,7 +54,7 @@ void SwapchainManager::createSwapchain(vk::SwapchainKHR oldSwapchain) {
 
     imageViews.clear();
     imageViews.reserve(images.size());
-    for (auto const &image : images) {
+    for (auto const& image : images) {
         vk::ImageViewCreateInfo createInfo;
 
         createInfo.viewType = vk::ImageViewType::e2D;
@@ -75,7 +75,7 @@ void SwapchainManager::recreateSwapchain() {
 }
 
 vk::Extent2D SwapchainManager::chooseSwapchainExtent(
-    vk::SurfaceCapabilitiesKHR const &surfaceCapabilities
+    vk::SurfaceCapabilitiesKHR const& surfaceCapabilities
 ) const {
     if (surfaceCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return surfaceCapabilities.currentExtent;
@@ -111,7 +111,7 @@ vk::PresentModeKHR SwapchainManager::choosePresentMode() const {
     vk::PresentModeKHR presentMode;
 
     uint32_t currentRating = std::numeric_limits<uint32_t>::max();
-    for (const auto &availablePresentMode : presentModes) {
+    for (const auto& availablePresentMode : presentModes) {
         auto candidateKVPairIter = presentModePreference.find(availablePresentMode);
         if (candidateKVPairIter == presentModePreference.cend()) {
             continue;

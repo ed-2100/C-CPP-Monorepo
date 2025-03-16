@@ -12,12 +12,14 @@ struct TODO {
         throw std::logic_error("TODO: Not implemented!");
     }
 
-    template <typename T> [[noreturn]] operator T() const {
+    template <typename T>
+    [[noreturn]] operator T() const {
         throw std::logic_error("TODO: This should be unreachable.");
     }
 };
 
-template <typename T> inline T expect(std::optional<T> wrapped, char const *msg) {
+template <typename T>
+inline T expect(std::optional<T> wrapped, char const* msg) {
     if (!wrapped) {
         throw std::runtime_error(msg);
     }

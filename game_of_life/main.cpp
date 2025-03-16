@@ -10,7 +10,7 @@
 constexpr size_t width = 1000;
 constexpr size_t height = 1000;
 
-int main(int /*argc*/, const char ** /*argv*/) {
+int main(int /*argc*/, const char** /*argv*/) {
     sf::RenderWindow window;
     window.create(sf::VideoMode({width, height}), "GOL", sf::Style::Titlebar | sf::Style::Close);
     // window.setFramerateLimit(100);
@@ -22,8 +22,8 @@ int main(int /*argc*/, const char ** /*argv*/) {
     auto pixels = std::make_unique<uint8_t[][width][4]>(height);
 
     std::fill(
-        reinterpret_cast<uint8_t *>(pixels.get()),
-        reinterpret_cast<uint8_t *>(pixels.get()) + height * width * 4,
+        reinterpret_cast<uint8_t*>(pixels.get()),
+        reinterpret_cast<uint8_t*>(pixels.get()) + height * width * 4,
         0
     );
 
@@ -79,7 +79,7 @@ int main(int /*argc*/, const char ** /*argv*/) {
             }
         }
 
-        texture.update(reinterpret_cast<uint8_t *>(pixels.get()));
+        texture.update(reinterpret_cast<uint8_t*>(pixels.get()));
         window.clear(sf::Color(255, 255, 255, 255));
         window.draw(sprite);
         window.display();

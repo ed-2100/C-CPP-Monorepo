@@ -8,20 +8,20 @@ public:
 
     SwapchainManager(std::nullptr_t) {}
 
-    SwapchainManager(Application &renderer) : renderer(&renderer) {
+    SwapchainManager(Application& renderer) : renderer(&renderer) {
         createSwapchain();
     }
 
-    SwapchainManager(const SwapchainManager &) = delete;
-    SwapchainManager &operator=(const SwapchainManager &) = delete;
+    SwapchainManager(const SwapchainManager&) = delete;
+    SwapchainManager& operator=(const SwapchainManager&) = delete;
 
-    SwapchainManager(SwapchainManager &&rhs) = default;
-    SwapchainManager &operator=(SwapchainManager &&other) = default;
+    SwapchainManager(SwapchainManager&& rhs) = default;
+    SwapchainManager& operator=(SwapchainManager&& other) = default;
 
     void createSwapchain(vk::SwapchainKHR oldSwapchain = nullptr);
     void recreateSwapchain();
 
-    Application *renderer;
+    Application* renderer;
 
     vk::SurfaceFormatKHR surfaceFormat;
     vk::Extent2D extent;
@@ -34,5 +34,5 @@ public:
 private:
     vk::PresentModeKHR choosePresentMode() const;
     vk::SurfaceFormatKHR chooseSurfaceFormat() const;
-    vk::Extent2D chooseSwapchainExtent(const vk::SurfaceCapabilitiesKHR &surfaceCapabilities) const;
+    vk::Extent2D chooseSwapchainExtent(const vk::SurfaceCapabilitiesKHR& surfaceCapabilities) const;
 };

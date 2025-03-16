@@ -9,7 +9,7 @@ constexpr std::array player_map{
 };
 
 /// ANSI escape code to clear the screen.
-constexpr char const *clear_screen = "\033[2J\033[H";
+constexpr char const* clear_screen = "\033[2J\033[H";
 
 void Game::run() {
     // Initialize the game board here so that the game can be restarted.
@@ -70,7 +70,7 @@ void Game::getInput(bool player) {
             try {
                 // This can throw an error, so catch it!
                 choice = std::stoi(s_choice) - 1;
-            } catch (const std::logic_error &) {
+            } catch (const std::logic_error&) {
                 std::cout << "Not a valid number!\n";
                 continue;
             }

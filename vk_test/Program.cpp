@@ -16,20 +16,20 @@ const std::array deviceExtensions1{
     vk::KHRSwapchainExtensionName,
 };
 
-char const *const appName1 = "Hello Triangle";
+char const* const appName1 = "Hello Triangle";
 
 VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     vk::DebugUtilsMessageSeverityFlagBitsEXT /*messageSeverity*/,
     vk::DebugUtilsMessageTypeFlagsEXT /*messageType*/,
-    vk::DebugUtilsMessengerCallbackDataEXT const *pCallbackData,
-    void * /*pUserData*/
+    vk::DebugUtilsMessengerCallbackDataEXT const* pCallbackData,
+    void* /*pUserData*/
 ) {
     std::cerr << "Validation layer message: " << pCallbackData->pMessage << '\n';
 
     return VK_FALSE;
 }
 
-Application::Application(std::filesystem::path const &exeDir) {
+Application::Application(std::filesystem::path const& exeDir) {
     sdlContext = SDLContext::getInstance();
 
     window = SDLWindow(appName1, 500, 500);
@@ -64,7 +64,7 @@ Application::Application(std::filesystem::path const &exeDir) {
     graphicsPipeline = createGraphicsPipeline(device, swapchainManager.extent, renderPass, exeDir);
 
     framebuffers.reserve(swapchainManager.imageViews.size());
-    for (auto const &imageView : swapchainManager.imageViews) {
+    for (auto const& imageView : swapchainManager.imageViews) {
         vk::FramebufferCreateInfo createInfo;
         createInfo.renderPass = renderPass;
         createInfo.width = swapchainManager.extent.width;
@@ -186,13 +186,13 @@ void Application::run() {
         }
     }
 
-    device.waitIdle(); // Validation compliance.
+    device.waitIdle();  // Validation compliance.
 }
 
 vk::raii::Instance Application::createInstance(
-    SDLContext const &sdlContext,
-    vk::raii::Context &vkContext,
-    void *pNext
+    SDLContext const& sdlContext,
+    vk::raii::Context& vkContext,
+    void* pNext
 ) {
     vk::ApplicationInfo appInfo;
     appInfo.pApplicationName = appName1;
@@ -202,7 +202,7 @@ vk::raii::Instance Application::createInstance(
     appInfo.apiVersion = VK_API_VERSION_1_3;
 
     auto sdlExtensions = sdlContext.getInstanceExtensions();
-    std::vector<char const *> instanceExtensions(sdlExtensions.cbegin(), sdlExtensions.cend());
+    std::vector<char const*> instanceExtensions(sdlExtensions.cbegin(), sdlExtensions.cend());
     instanceExtensions.push_back("VK_EXT_debug_utils");
     instanceExtensions.push_back("VK_KHR_portability_enumeration");
 
@@ -217,8 +217,8 @@ vk::raii::Instance Application::createInstance(
 }
 
 vk::raii::RenderPass Application::createRenderPass(
-    vk::raii::Device const &device,
-    vk::SurfaceFormatKHR const &surfaceFormat
+    vk::raii::Device const& device,
+    vk::SurfaceFormatKHR const& surfaceFormat
 ) {
     vk::AttachmentDescription colorAttachment;
     colorAttachment.format = surfaceFormat.format;
@@ -253,10 +253,10 @@ vk::raii::RenderPass Application::createRenderPass(
 }
 
 vk::raii::Pipeline Application::createGraphicsPipeline(
-    vk::raii::Device const &device,
-    vk::Extent2D const &swapchainExtent,
-    vk::raii::RenderPass const &renderPass,
-    std::filesystem::path const &exeDir
+    vk::raii::Device const& device,
+    vk::Extent2D const& swapchainExtent,
+    vk::raii::RenderPass const& renderPass,
+    std::filesystem::path const& exeDir
 ) {
     auto vertexShaderCode = readFile(exeDir / "shader.vert.spv");
     auto vertexShader = createShaderModule(device, vertexShaderCode);
@@ -306,7 +306,7 @@ vk::raii::Pipeline Application::createGraphicsPipeline(
     rasterizationStateCreateInfo.cullMode = vk::CullModeFlagBits::eBack;
     rasterizationStateCreateInfo.frontFace = vk::FrontFace::eClockwise;
     rasterizationStateCreateInfo.depthBiasEnable = false;
-    rasterizationStateCreateInfo.lineWidth = 1.0; // Validation compliance.
+    rasterizationStateCreateInfo.lineWidth = 1.0;  // Validation compliance.
 
     vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo;
     multisampleStateCreateInfo.sampleShadingEnable = false;
@@ -345,9 +345,9 @@ vk::raii::Pipeline Application::createGraphicsPipeline(
 }
 
 vk::raii::Device Application::createDevice(
-    vk::raii::PhysicalDevice const &physicalDevice,
-    QueueFamilyIndexMap const &queueFamilyIndices,
-    std::span<char const *const> deviceExtensions
+    vk::raii::PhysicalDevice const& physicalDevice,
+    QueueFamilyIndexMap const& queueFamilyIndices,
+    std::span<char const* const> deviceExtensions
 ) {
     vk::PhysicalDeviceFeatures deviceFeatures;
 
@@ -372,14 +372,14 @@ vk::raii::Device Application::createDevice(
     return physicalDevice.createDevice(createInfo);
 }
 
-std::vector<uint32_t> Application::readFile(std::filesystem::path const &filename) {
+std::vector<uint32_t> Application::readFile(std::filesystem::path const& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
         throw std::runtime_error("Failed to open file!");
     }
 
     size_t size = file.tellg();
-    if (size % sizeof(uint32_t) != 0) { // Will make this more robust as necessary.
+    if (size % sizeof(uint32_t) != 0) {  // Will make this more robust as necessary.
         throw std::runtime_error("File size is not a multiple of uint32_t!");
     }
 
@@ -387,7 +387,7 @@ std::vector<uint32_t> Application::readFile(std::filesystem::path const &filenam
 
     std::vector<uint32_t> fileContents;
     fileContents.resize(size / 4);
-    file.read(reinterpret_cast<char *>(fileContents.data()), size);
+    file.read(reinterpret_cast<char*>(fileContents.data()), size);
     if (!file) {
         throw std::runtime_error("Error reading file!");
     }
@@ -396,20 +396,20 @@ std::vector<uint32_t> Application::readFile(std::filesystem::path const &filenam
 }
 
 vk::raii::ShaderModule
-Application::createShaderModule(vk::raii::Device const &device, std::vector<uint32_t> const &code) {
+Application::createShaderModule(vk::raii::Device const& device, std::vector<uint32_t> const& code) {
     vk::ShaderModuleCreateInfo createInfo;
     createInfo.setCode(code);
     return device.createShaderModule(createInfo);
 }
 
 std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> Application::pickPhysicalDevice(
-    vk::raii::Instance const &instance,
-    vk::SurfaceKHR const &surface,
-    std::span<char const *const> deviceExtensions
+    vk::raii::Instance const& instance,
+    vk::SurfaceKHR const& surface,
+    std::span<char const* const> deviceExtensions
 ) {
     auto physicalDevices = instance.enumeratePhysicalDevices();
 
-    for (auto &physicalDevice : physicalDevices) {
+    for (auto& physicalDevice : physicalDevices) {
         auto vFamilyProperties = physicalDevice.getQueueFamilyProperties();
 
         std::optional<uint32_t> graphicsFamily;
@@ -440,7 +440,7 @@ std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> Application::pickPhysi
             deviceExtensions.cbegin(),
             deviceExtensions.cend(),
         };
-        for (auto const &extensionProperties : vExtensionProperties) {
+        for (auto const& extensionProperties : vExtensionProperties) {
             extensionChecklist.erase(extensionProperties.extensionName);
         }
         if (!extensionChecklist.empty()) {

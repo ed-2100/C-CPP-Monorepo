@@ -2,7 +2,7 @@
 
 #include "cleanupstack.h"
 
-bool CleanupStackInit(CleanupStack *cleanupStack, size_t capacity) {
+bool CleanupStackInit(CleanupStack* cleanupStack, size_t capacity) {
     if (0 == capacity) {
         return false;
     }
@@ -18,14 +18,14 @@ bool CleanupStackInit(CleanupStack *cleanupStack, size_t capacity) {
     return true;
 }
 
-bool CleanupStackReserve(CleanupStack *cleanupStack, size_t size) {
+bool CleanupStackReserve(CleanupStack* cleanupStack, size_t size) {
     if (size > cleanupStack->capacity - cleanupStack->used) {
         size_t newCapacity = cleanupStack->capacity * 2;
         if (size > newCapacity) {
             newCapacity = cleanupStack->capacity + size;
         }
 
-        void *newLocation = realloc(cleanupStack->ptr, newCapacity);
+        void* newLocation = realloc(cleanupStack->ptr, newCapacity);
         if (NULL == newLocation) {
             return false;
         }
@@ -37,28 +37,28 @@ bool CleanupStackReserve(CleanupStack *cleanupStack, size_t size) {
     return true;
 }
 
-void CleanupStackFlush(CleanupStack *cleanupStack) {
-    void *pEnd = cleanupStack->ptr + cleanupStack->used;
+void CleanupStackFlush(CleanupStack* cleanupStack) {
+    void* pEnd = cleanupStack->ptr + cleanupStack->used;
     while (pEnd > cleanupStack->ptr) {
-        enum CleanupTask sType = *(enum CleanupTask *)(pEnd -= sizeof(enum CleanupTask));
+        enum CleanupTask sType = *(enum CleanupTask*)(pEnd -= sizeof(enum CleanupTask));
 
         switch (sType) {
-        case CLEANUP_TASK_MALLOC: {
-            void *ptr = *(void **)(pEnd -= sizeof(void *));
-            free(ptr);
-            break;
-        }
-            /*OTHER TASK HANDLING*/
+            case CLEANUP_TASK_MALLOC: {
+                void* ptr = *(void**)(pEnd -= sizeof(void*));
+                free(ptr);
+                break;
+            }
+                /*OTHER TASK HANDLING*/
         }
     }
 }
 
-bool CleanupStackPushMalloc(CleanupStack *cleanupStack, void *ptr) {
+bool CleanupStackPushMalloc(CleanupStack* cleanupStack, void* ptr) {
     if (!CleanupStackReserve(cleanupStack, sizeof(CleanupTaskMalloc))) {
         return false;
     }
 
-    CleanupTaskMalloc *newStruct = (CleanupTaskMalloc *)(cleanupStack->ptr + cleanupStack->used);
+    CleanupTaskMalloc* newStruct = (CleanupTaskMalloc*)(cleanupStack->ptr + cleanupStack->used);
 
     newStruct->ptr = ptr;
     newStruct->sType = CLEANUP_TASK_MALLOC;

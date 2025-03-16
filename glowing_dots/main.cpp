@@ -15,7 +15,7 @@
 constexpr uint32_t width = 1000;
 constexpr uint32_t height = 1000;
 
-int main(int /*argc*/, const char ** /*argv*/) {
+int main(int /*argc*/, const char** /*argv*/) {
     sf::RenderWindow window;
     window.create(
         sf::VideoMode({width, height}),
@@ -31,8 +31,8 @@ int main(int /*argc*/, const char ** /*argv*/) {
     auto pixels = std::make_unique<uint8_t[][width][4]>(height);
 
     std::fill(
-        reinterpret_cast<uint8_t *>(pixels.get()),
-        reinterpret_cast<uint8_t *>(pixels.get()) + height * width * 4,
+        reinterpret_cast<uint8_t*>(pixels.get()),
+        reinterpret_cast<uint8_t*>(pixels.get()) + height * width * 4,
         255
     );
 
@@ -93,7 +93,7 @@ int main(int /*argc*/, const char ** /*argv*/) {
             }
         }
 
-        texture.update(reinterpret_cast<uint8_t *>(pixels.get()));
+        texture.update(reinterpret_cast<uint8_t*>(pixels.get()));
         // window.clear();
         window.draw(sprite);
         window.display();
