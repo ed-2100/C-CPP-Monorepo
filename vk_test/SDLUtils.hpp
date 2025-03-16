@@ -58,9 +58,7 @@ struct SDLWindow final : public Window {
         return VkExtent2D{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
     }
 
-    constexpr operator SDL_Window*() const {
-        return handle;
-    }
+    constexpr operator SDL_Window*() const { return handle; }
 
     SDL_Window* handle = {};
 };

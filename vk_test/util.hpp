@@ -8,9 +8,7 @@
 
 // Probably the most baller `todo!()` implementation there ever was.
 struct TODO {
-    [[noreturn]] TODO() {
-        throw std::logic_error("TODO: Not implemented!");
-    }
+    [[noreturn]] TODO() { throw std::logic_error("TODO: Not implemented!"); }
 
     template <typename T>
     [[noreturn]] operator T() const {

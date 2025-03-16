@@ -21,9 +21,7 @@ struct Surface {
         return *this;
     }
 
-    constexpr operator vk::SurfaceKHR() const {
-        return surface;
-    }
+    constexpr operator vk::SurfaceKHR() const { return surface; }
 
     vk::SurfaceKHR surface = {};
 };
