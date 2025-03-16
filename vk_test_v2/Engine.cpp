@@ -8,7 +8,7 @@ namespace vke {
 VulkanEngine::VulkanEngine() {
     auto sdl_context = SDLContext();
 
-    auto window = std::make_shared<SDLWindowInner>(sdl_context, "Vulkan Engine", 500, 500);
+    auto window = SDLWindow(sdl_context, "Vulkan Engine", 500, 500);
 
     auto instance = InstanceBuilder()
                         .with_validation_layers()
