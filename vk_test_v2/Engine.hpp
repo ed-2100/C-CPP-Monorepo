@@ -1,7 +1,9 @@
 #pragma once
 
-#include <memory>
 #include "SDLUtils.hpp"
+#include "VulkanUtils.hpp"
+
+#include <memory>
 
 namespace vke {
 
@@ -19,7 +21,7 @@ class VulkanEngineInner {
 
 public:
     VulkanEngineInner() = delete;
-    VulkanEngineInner(
+    constexpr VulkanEngineInner(
         SDLContext sdl_context,
         SDLWindow window,
         Instance instance,
@@ -34,7 +36,7 @@ class VulkanEngine {
 public:
     VulkanEngine();
 
-    VulkanEngineInner& operator*() {
+    constexpr VulkanEngineInner& operator*() {
         return *inner;
     }
 

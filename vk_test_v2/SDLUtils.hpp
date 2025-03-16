@@ -29,7 +29,7 @@ class SDLContext {
 public:
     SDLContext();
 
-    SDLContextInner& operator*() {
+    constexpr SDLContextInner& operator*() {
         return *inner;
     }
 
@@ -40,7 +40,7 @@ public:
 
 struct SDLWindowInner {
     SDLWindowInner() = delete;
-    SDLWindowInner(SDLContext sdl_context, SDL_Window* handle)
+    constexpr SDLWindowInner(SDLContext sdl_context, SDL_Window* handle)
         : sdl_context(sdl_context), handle(handle) {}
     ~SDLWindowInner();
 
@@ -71,7 +71,8 @@ public:
 
 struct SDLSurfaceInner {
     SDLSurfaceInner() = delete;
-    SDLSurfaceInner(SDLWindow window, Instance instance);
+    constexpr SDLSurfaceInner(SDLWindow window, Instance instance, VkSurfaceKHR surface)
+        : window(window), instance(instance), surface(surface) {}
     ~SDLSurfaceInner();
 
     SDLSurfaceInner(SDLSurfaceInner&) = delete;
@@ -80,12 +81,21 @@ struct SDLSurfaceInner {
     SDLSurfaceInner(SDLSurfaceInner&&) = delete;
     SDLSurfaceInner& operator=(SDLSurfaceInner&&) = delete;
 
-private:
     SDLWindow window;
     Instance instance;
     VkSurfaceKHR surface;
 };
 
-using SDLSurface = std::shared_ptr<SDLSurfaceInner>;
+class SDLSurface {
+    std::shared_ptr<SDLSurfaceInner> inner;
+
+public:
+    SDLSurface() = delete;
+    SDLSurface(SDLWindow window, Instance instance);
+
+    constexpr operator VkSurfaceKHR() const {
+        return inner->surface;
+    }
+};
 
 }  // namespace vke

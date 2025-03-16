@@ -80,17 +80,19 @@ VkExtent2D SDLWindow::queryExtent() const {
 
 // ----- SDLSurface -----
 
-SDLSurfaceInner::SDLSurfaceInner(SDLWindow window, Instance instance)
-    : window(window), instance(instance) {
-    if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {
-        throw std::runtime_error(std::format("Failed to create surface: {}", SDL_GetError()));
-    }
-}
-
 SDLSurfaceInner::~SDLSurfaceInner() {
     if (surface) {
         SDL_Vulkan_DestroySurface(instance, surface, nullptr);
     }
+}
+
+SDLSurface::SDLSurface(SDLWindow window, Instance instance) {
+    VkSurfaceKHR surface;
+    if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {
+        throw std::runtime_error(std::format("Failed to create surface: {}", SDL_GetError()));
+    }
+
+    inner = std::make_shared<SDLSurfaceInner>(window, instance, surface);
 }
 
 }  // namespace vke

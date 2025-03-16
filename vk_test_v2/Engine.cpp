@@ -1,7 +1,6 @@
 #include "Engine.hpp"
 
 #include <iostream>
-#include "SDLUtils.hpp"
 
 namespace vke {
 
@@ -15,7 +14,7 @@ VulkanEngine::VulkanEngine() {
                         .with_extensions(sdl_context.getInstanceExtensions())
                         .build();
 
-    auto surface = std::make_shared<SDLSurfaceInner>(window, instance);
+    auto surface = SDLSurface(window, instance);
 
     inner = std::make_shared<VulkanEngineInner>(sdl_context, window, instance, surface);
 }

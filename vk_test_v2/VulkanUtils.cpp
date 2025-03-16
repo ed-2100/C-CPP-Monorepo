@@ -102,6 +102,7 @@ Instance InstanceBuilder::build() {
 }
 
 InstanceBuilder& InstanceBuilder::with_validation_layers() {
+    assert(!validation_layers);
     this->validation_layers = true;
     layers.push_back("VK_LAYER_KHRONOS_validation");
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
