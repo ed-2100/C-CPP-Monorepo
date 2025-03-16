@@ -43,10 +43,6 @@ std::shared_ptr<SDLContextInner> SDLContextInner::getInstance() {
     return sharedInstance;
 }
 
-SDLContext::SDLContext() {
-    inner = SDLContextInner::getInstance();
-}
-
 std::span<char const* const> SDLContext::getInstanceExtensions() const {
     uint32_t sdlExtensionCount;
     char const* const* sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
@@ -61,17 +57,20 @@ std::span<char const* const> SDLContext::getInstanceExtensions() const {
 // ----- SDLWindow -----
 
 SDLWindowInner::SDLWindowInner(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h)
-    : sdl_context(sdl_context) {
-    handle = SDL_CreateWindow(name, w, h, SDL_WINDOW_VULKAN);
-    if (!handle) {
-        throw std::runtime_error(std::format("Failed to create an SDL window: {}", SDL_GetError()));
-    }
-}
+    : sdl_context(sdl_context), handle([&name, &w, &h]() {
+          SDL_Window* handle = SDL_CreateWindow(name, w, h, SDL_WINDOW_VULKAN);
+          if (!handle) {
+              throw std::runtime_error(
+                  std::format("Failed to create an SDL window: {}", SDL_GetError())
+              );
+          }
+          return handle;
+      }()) {}
 
 SDLWindowInner::~SDLWindowInner() {
-    if (handle) {
-        SDL_DestroyWindow(handle);
-    }
+    // SAFETY: handle is guaranteed to not be null, because
+    //         the class is not copyable or movable.
+    SDL_DestroyWindow(handle);
 }
 
 VkExtent2D SDLWindowInner::queryExtent() const {
@@ -89,16 +88,18 @@ VkExtent2D SDLWindowInner::queryExtent() const {
 // ----- SDLSurface -----
 
 SDLSurfaceInner::SDLSurfaceInner(SDLWindow window, Instance instance)
-    : window(window), instance(instance) {
-    if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {
-        throw std::runtime_error(std::format("Failed to create surface: {}", SDL_GetError()));
-    }
-}
+    : window(window), instance(instance), surface([&window, &instance]() {
+          VkSurfaceKHR surface;
+          if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {
+              throw std::runtime_error(std::format("Failed to create surface: {}", SDL_GetError()));
+          }
+          return surface;
+      }()) {}
 
 SDLSurfaceInner::~SDLSurfaceInner() {
-    if (surface) {
-        SDL_Vulkan_DestroySurface(instance, surface, nullptr);
-    }
+    // SAFETY: surface is guaranteed to not be null, because
+    //         the class is not copyable or movable.
+    SDL_Vulkan_DestroySurface(instance, surface, nullptr);
 }
 
 }  // namespace vke

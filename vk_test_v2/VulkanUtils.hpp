@@ -9,9 +9,9 @@
 namespace vke {
 
 class InstanceInner {
-    VkInstance instance;
-    VkDebugUtilsMessengerEXT debug_messenger;
-    PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
+    const VkInstance instance;
+    const VkDebugUtilsMessengerEXT debug_messenger;
+    const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
 
     InstanceInner(const InstanceInner&) = delete;
     InstanceInner& operator=(const InstanceInner&) = delete;
@@ -22,19 +22,19 @@ class InstanceInner {
 public:
     InstanceInner() = delete;
     InstanceInner(VkInstance instance, VkDebugUtilsMessengerEXT debug_messenger);
-    ~InstanceInner() noexcept;
+    ~InstanceInner();
 
-    inline operator VkInstance() { return instance; }
+    inline operator VkInstance() const { return instance; }
 };
 
 class Instance {
-    std::shared_ptr<InstanceInner> inner;
+    const std::shared_ptr<InstanceInner> inner;
 
 public:
     Instance() = delete;
-    Instance(std::shared_ptr<InstanceInner> inner) : inner(inner) { assert(inner); }
+    inline Instance(std::shared_ptr<InstanceInner> inner) : inner(inner) { assert(inner); }
 
-    inline operator VkInstance() { return *inner; }
+    inline operator VkInstance() const { return *inner; }
 };
 
 class InstanceBuilder {
@@ -45,7 +45,7 @@ class InstanceBuilder {
     const void* pNext = nullptr;
 
 public:
-    InstanceBuilder() {}
+    inline InstanceBuilder() {}
 
     Instance build();
 

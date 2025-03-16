@@ -26,10 +26,10 @@ public:
 };
 
 class SDLContext {
-    std::shared_ptr<SDLContextInner> inner;
+    const std::shared_ptr<SDLContextInner> inner;
 
 public:
-    SDLContext();
+    inline SDLContext() : inner(SDLContextInner::getInstance()) {}
 
     std::span<char const* const> getInstanceExtensions() const;
 };
@@ -37,8 +37,8 @@ public:
 // ----- SDLWindow -----
 
 class SDLWindowInner {
-    SDLContext sdl_context;
-    SDL_Window* handle;
+    const SDLContext sdl_context;
+    SDL_Window* const handle;
 
     SDLWindowInner(SDLWindowInner&) = delete;
     SDLWindowInner& operator=(SDLWindowInner&) = delete;
@@ -57,11 +57,11 @@ public:
 };
 
 class SDLWindow {
-    std::shared_ptr<SDLWindowInner> inner;
+    const std::shared_ptr<SDLWindowInner> inner;
 
 public:
     SDLWindow() = delete;
-    SDLWindow(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h)
+    inline SDLWindow(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h)
         : inner(std::make_shared<SDLWindowInner>(sdl_context, name, w, h)) {}
 
     inline operator SDL_Window*() const { return *inner; }
@@ -72,9 +72,9 @@ public:
 // ----- SDLSurface -----
 
 class SDLSurfaceInner {
-    SDLWindow window;
-    Instance instance;
-    VkSurfaceKHR surface;
+    const SDLWindow window;
+    const Instance instance;
+    const VkSurfaceKHR surface;
 
     SDLSurfaceInner(SDLSurfaceInner&) = delete;
     SDLSurfaceInner& operator=(SDLSurfaceInner&) = delete;
@@ -91,11 +91,11 @@ public:
 };
 
 class SDLSurface {
-    std::shared_ptr<SDLSurfaceInner> inner;
+    const std::shared_ptr<SDLSurfaceInner> inner;
 
 public:
     SDLSurface() = delete;
-    SDLSurface(SDLWindow window, Instance instance)
+    inline SDLSurface(SDLWindow window, Instance instance)
         : inner(std::make_shared<SDLSurfaceInner>(window, instance)) {}
 
     inline operator VkSurfaceKHR() const { return *inner; }

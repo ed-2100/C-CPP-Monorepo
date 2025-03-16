@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     } catch (const std::exception& e) {
         std::cerr << std::format("Caught {}: {}", typeid(e).name(), e.what());
     } catch (...) {
-        std::cerr << "Unknown Exception";
+        std::cerr << "Unknown Exception" << std::endl;
     }
 
     std::cout << "Deinitialized." << std::endl;

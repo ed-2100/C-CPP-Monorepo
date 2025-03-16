@@ -23,24 +23,26 @@ static void checkResult(VkResult result) {
 
 namespace vke {
 
+// ----- Instance -----
+
 InstanceInner::InstanceInner(VkInstance instance, VkDebugUtilsMessengerEXT debug_messenger)
-    : instance(instance), debug_messenger(debug_messenger) {
-    vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT
-    )vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    : instance(instance),
+      debug_messenger(debug_messenger),
+      vkDestroyDebugUtilsMessengerEXT((PFN_vkDestroyDebugUtilsMessengerEXT
+      )vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT")) {
+    assert(instance);
 
     if (!vkDestroyDebugUtilsMessengerEXT) {
         checkResult(VK_ERROR_EXTENSION_NOT_PRESENT);
     }
 }
 
-InstanceInner::~InstanceInner() noexcept {
+InstanceInner::~InstanceInner() {
     if (debug_messenger) {
         vkDestroyDebugUtilsMessengerEXT(instance, debug_messenger, nullptr);
     }
 
-    if (instance) {
-        vkDestroyInstance(instance, nullptr);
-    }
+    vkDestroyInstance(instance, nullptr);
 }
 
 Instance InstanceBuilder::build() {
@@ -102,7 +104,6 @@ Instance InstanceBuilder::build() {
 }
 
 InstanceBuilder& InstanceBuilder::with_validation_layers() {
-    assert(!validation_layers);
     this->validation_layers = true;
     layers.push_back("VK_LAYER_KHRONOS_validation");
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
