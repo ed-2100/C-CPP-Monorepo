@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstring>
 #include <memory>
+#include <ranges>
 #include <vector>
 
 namespace vke {
@@ -109,40 +110,49 @@ public:
 
 /// WARNING: This contains delicate code!
 class PhysicalDeviceSelector {
+    struct MemoryLayout {
+        VkStructureType sType;
+        void* pNext;
+        VkBool32 first;
+        VkBool32 second;
+    };
+
+    static constexpr size_t offset_sType = offsetof(MemoryLayout, sType);
+    static constexpr size_t offset_pNext = offsetof(MemoryLayout, pNext);
+    static constexpr size_t offset_first = offsetof(MemoryLayout, first);
+
     struct Node {
         std::byte* user;
         std::byte* api;
         size_t size;
         Node* next;
 
-        Node(size_t size) : size(size), next(nullptr) {
-            user = new std::byte[size];
-            api = new std::byte[size];
-        }
+        Node(size_t size);
+        ~Node();
 
-        ~Node() {
-            delete[] user;
-            delete[] api;
+        inline constexpr VkStructureType& api_sType() {
+            return *(VkStructureType*)(api + offset_sType);
+        }
+        inline constexpr VkStructureType& user_sType() {
+            return *(VkStructureType*)(user + offset_sType);
+        }
+        inline constexpr void*& api_pNext() { return *(void**)(api + offset_pNext); }
+        inline constexpr void*& user_pNext() { return *(void**)(user + offset_pNext); }
+        inline auto get_bool_pairs() const {
+            return std::views::iota(size_t(0), (size - offset_first) / sizeof(VkBool32)) |
+                   std::views::transform([&](size_t i) {
+                       return std::tuple(
+                           ((VkBool32*)(user + offset_first))[i],
+                           ((VkBool32*)(api + offset_first))[i]
+                       );
+                   });
         }
     };
-
-    struct MemoryLayout {
-        VkStructureType sType;
-        void* pNext;
-        VkBool32 first;
-    };
-    static constexpr size_t offset_sType = offsetof(MemoryLayout, sType);
-    static constexpr size_t offset_pNext = offsetof(MemoryLayout, pNext);
-    static constexpr size_t offset_first = offsetof(MemoryLayout, first);
-    static constexpr VkStructureType& sType(std::byte* data) {
-        return *(VkStructureType*)(data + offset_sType);
-    }
-    static constexpr void*& pNext(std::byte* data) { return *(void**)(data + offset_pNext); }
 
     Node* head = nullptr;
     VkPhysicalDeviceFeatures2 features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
 
-    bool with_features_struct_inner(std::byte* to_add, size_t size);
+    void with_features_struct_inner(std::byte* to_add, size_t size);
     bool is_suitable(VkPhysicalDevice physical_device) const;
 
 public:
@@ -156,8 +166,7 @@ public:
 
     template <>
     inline PhysicalDeviceSelector& with_features_struct(const VkPhysicalDeviceFeatures2& to_add) {
-        assert(to_add.sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2);
-        memcpy((std::byte*)&features + 16, &to_add, sizeof(features));
+        memcpy((std::byte*)&features, &to_add, sizeof(features));
         return *this;
     }
 

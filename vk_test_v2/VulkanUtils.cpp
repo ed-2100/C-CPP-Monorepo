@@ -98,6 +98,16 @@ DebugUtilsMessengerEXT::Inner::~Inner() {
 
 // ----- PhysicalDeviceSelector -----
 
+PhysicalDeviceSelector::Node::Node(size_t size) : size(size), next(nullptr) {
+    user = new std::byte[size];
+    api = new std::byte[size];
+}
+
+PhysicalDeviceSelector::Node::~Node() {
+    delete[] user;
+    delete[] api;
+}
+
 PhysicalDeviceSelector::~PhysicalDeviceSelector() {
     while (head) {
         Node* next = head->next;
@@ -106,13 +116,13 @@ PhysicalDeviceSelector::~PhysicalDeviceSelector() {
     }
 }
 
-bool PhysicalDeviceSelector::with_features_struct_inner(std::byte* to_add, size_t size) {
+void PhysicalDeviceSelector::with_features_struct_inner(std::byte* to_add, size_t size) {
     Node* next = head;
 
     while (next) {
-        if (sType(next->user) == sType(to_add)) {
+        if (next->user_sType() == *(VkStructureType*)to_add) {
             memcpy(next->user + offset_first, &to_add, size - offset_first);
-            return true;
+            return;
         }
 
         next = next->next;
@@ -120,27 +130,27 @@ bool PhysicalDeviceSelector::with_features_struct_inner(std::byte* to_add, size_
 
     Node* newNode = new Node(size);
     memcpy(newNode->user, to_add, size);
-    sType(newNode->api) = sType(to_add);
-
+    newNode->user_sType() = *(VkStructureType*)to_add;
+    newNode->api_sType() = *(VkStructureType*)to_add;
     if (!head) {
-        pNext(newNode->user) = nullptr;
-        pNext(newNode->api) = nullptr;
-        head = newNode;
+        newNode->user_pNext() = nullptr;
+        newNode->api_pNext() = nullptr;
+        newNode->next = nullptr;
     } else {
-        pNext(newNode->user) = head->user;
-        pNext(newNode->api) = head->api;
+        newNode->user_pNext() = head->user;
+        newNode->api_pNext() = head->api;
         newNode->next = head;
-        head = newNode;
     }
-
-    return false;
+    head = newNode;
 }
 
 bool PhysicalDeviceSelector::is_suitable(VkPhysicalDevice physical_device) const {
     Node node = Node(sizeof(features));
     memcpy(node.user, &features, node.size);
-    sType(node.api) = features.sType;
-    pNext(node.api) = pNext(head->api);
+    node.user_sType() = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    node.api_sType() = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    node.user_pNext() = head->user;
+    node.api_pNext() = head->api;
     node.next = head;
 
     vkGetPhysicalDeviceFeatures2(physical_device, (VkPhysicalDeviceFeatures2*)node.api);
@@ -148,11 +158,9 @@ bool PhysicalDeviceSelector::is_suitable(VkPhysicalDevice physical_device) const
     Node* next = &node;
 
     while (next) {
-        for (size_t i = offset_first; i < next->size; i += sizeof(VkBool32)) {
-            VkBool32 feature = *(VkBool32*)(next->user + i);
-            if (feature) {
-                VkBool32 api_feature = *(VkBool32*)(next->api + i);
-                if (!api_feature) return false;
+        for (auto [user_flag, api_flag] : next->get_bool_pairs()) {
+            if (user_flag) {
+                if (!api_flag) { return false; }
             }
         }
 

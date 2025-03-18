@@ -78,13 +78,7 @@ VulkanEngine::VulkanEngine() {
 
     std::cout << physical_devices.size() << std::endl;
 
-    inner = std::make_shared<Inner>(
-        sdl_context,
-        window,
-        instance,
-        debug_messenger,
-        surface
-    );
+    inner = std::make_shared<Inner>(sdl_context, window, instance, debug_messenger, surface);
 }
 
 void VulkanEngine::Inner::run() {
