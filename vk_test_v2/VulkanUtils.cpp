@@ -1,6 +1,7 @@
 #include "VulkanUtils.hpp"
 
 #include <vulkan/vulkan_core.h>
+#include <cstddef>
 #include <cstring>
 #include <ranges>
 
@@ -109,8 +110,8 @@ bool PhysicalDeviceSelector::with_features_struct_inner(std::byte* to_add, size_
     Node* next = head;
 
     while (next) {
-        if (*(VkStructureType*)(next->user) == *(VkStructureType*)to_add) {
-            memcpy(next->user + 16, &to_add, size - 16);
+        if (sType(next->user) == sType(to_add)) {
+            memcpy(next->user + offset_first, &to_add, size - offset_first);
             return true;
         }
 
@@ -119,15 +120,15 @@ bool PhysicalDeviceSelector::with_features_struct_inner(std::byte* to_add, size_
 
     Node* newNode = new Node(size);
     memcpy(newNode->user, to_add, size);
-    *(VkStructureType*)(newNode->api) = *(VkStructureType*)to_add;
+    sType(newNode->api) = sType(to_add);
 
     if (!head) {
-        *(void**)(newNode->user + 8) = nullptr;
-        *(void**)(newNode->api + 8) = nullptr;
+        pNext(newNode->user) = nullptr;
+        pNext(newNode->api) = nullptr;
         head = newNode;
     } else {
-        *(void**)(newNode->user + 8) = head->user;
-        *(void**)(newNode->api + 8) = head->api;
+        pNext(newNode->user) = head->user;
+        pNext(newNode->api) = head->api;
         newNode->next = head;
         head = newNode;
     }
@@ -138,8 +139,8 @@ bool PhysicalDeviceSelector::with_features_struct_inner(std::byte* to_add, size_
 bool PhysicalDeviceSelector::is_suitable(VkPhysicalDevice physical_device) const {
     Node node = Node(sizeof(features));
     memcpy(node.user, &features, node.size);
-    *(VkStructureType*)node.api = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    *(void**)(node.api + 8) = *(void**)(head->api + 8);
+    sType(node.api) = features.sType;
+    pNext(node.api) = pNext(head->api);
     node.next = head;
 
     vkGetPhysicalDeviceFeatures2(physical_device, (VkPhysicalDeviceFeatures2*)node.api);
@@ -147,7 +148,7 @@ bool PhysicalDeviceSelector::is_suitable(VkPhysicalDevice physical_device) const
     Node* next = &node;
 
     while (next) {
-        for (size_t i = 16; i < next->size; i += sizeof(VkBool32)) {
+        for (size_t i = offset_first; i < next->size; i += sizeof(VkBool32)) {
             VkBool32 feature = *(VkBool32*)(next->user + i);
             if (feature) {
                 VkBool32 api_feature = *(VkBool32*)(next->api + i);

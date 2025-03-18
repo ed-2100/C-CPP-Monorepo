@@ -126,6 +126,19 @@ class PhysicalDeviceSelector {
         }
     };
 
+    struct MemoryLayout {
+        VkStructureType sType;
+        void* pNext;
+        VkBool32 first;
+    };
+    static constexpr size_t offset_sType = offsetof(MemoryLayout, sType);
+    static constexpr size_t offset_pNext = offsetof(MemoryLayout, pNext);
+    static constexpr size_t offset_first = offsetof(MemoryLayout, first);
+    static constexpr VkStructureType& sType(std::byte* data) {
+        return *(VkStructureType*)(data + offset_sType);
+    }
+    static constexpr void*& pNext(std::byte* data) { return *(void**)(data + offset_pNext); }
+
     Node* head = nullptr;
     VkPhysicalDeviceFeatures2 features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
 
