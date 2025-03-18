@@ -20,7 +20,5 @@ int main(int /*argc*/, char const* const* argv) {
         renderer.run();
     } catch (const std::exception& e) {
         std::cout << typeid(e).name() << ": " << e.what() << std::endl;
-    } catch (...) {
-        std::cout << "Unknown exception.";
-    }
+    } catch (...) { std::cout << "Unknown exception."; }
 }

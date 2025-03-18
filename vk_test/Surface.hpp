@@ -15,9 +15,7 @@ struct Surface {
     Surface(Surface&& rhs) noexcept : surface(std::exchange(rhs.surface, {})) {};
 
     Surface& operator=(Surface&& rhs) noexcept {
-        if (this != &rhs) {
-            surface = std::exchange(rhs.surface, {});
-        }
+        if (this != &rhs) { surface = std::exchange(rhs.surface, {}); }
         return *this;
     }
 

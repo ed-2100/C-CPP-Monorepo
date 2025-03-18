@@ -179,9 +179,7 @@ void Application::run() {
             if (event.type == SDL_EVENT_QUIT) {
                 done = true;
             } else if (event.type == SDL_EVENT_KEY_DOWN) {
-                if (event.key.key == SDLK_ESCAPE) {
-                    done = true;
-                }
+                if (event.key.key == SDLK_ESCAPE) { done = true; }
             }
         }
     }
@@ -374,9 +372,7 @@ vk::raii::Device Application::createDevice(
 
 std::vector<uint32_t> Application::readFile(std::filesystem::path const& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
-    if (!file.is_open()) {
-        throw std::runtime_error("Failed to open file!");
-    }
+    if (!file.is_open()) { throw std::runtime_error("Failed to open file!"); }
 
     size_t size = file.tellg();
     if (size % sizeof(uint32_t) != 0) {  // Will make this more robust as necessary.
@@ -388,9 +384,7 @@ std::vector<uint32_t> Application::readFile(std::filesystem::path const& filenam
     std::vector<uint32_t> fileContents;
     fileContents.resize(size / 4);
     file.read(reinterpret_cast<char*>(fileContents.data()), size);
-    if (!file) {
-        throw std::runtime_error("Error reading file!");
-    }
+    if (!file) { throw std::runtime_error("Error reading file!"); }
 
     return fileContents;
 }
@@ -419,9 +413,7 @@ std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> Application::pickPhysi
                 break;
             }
         }
-        if (!graphicsFamily) {
-            continue;
-        }
+        if (!graphicsFamily) { continue; }
 
         std::optional<uint32_t> presentFamily;
         for (const auto [i, familyProperties] : std::views::enumerate(vFamilyProperties)) {
@@ -430,9 +422,7 @@ std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> Application::pickPhysi
                 break;
             }
         }
-        if (!presentFamily) {
-            continue;
-        }
+        if (!presentFamily) { continue; }
 
         auto vExtensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
 
@@ -443,9 +433,7 @@ std::tuple<vk::raii::PhysicalDevice, QueueFamilyIndexMap> Application::pickPhysi
         for (auto const& extensionProperties : vExtensionProperties) {
             extensionChecklist.erase(extensionProperties.extensionName);
         }
-        if (!extensionChecklist.empty()) {
-            continue;
-        }
+        if (!extensionChecklist.empty()) { continue; }
 
         return std::make_tuple(
             std::move(physicalDevice),

@@ -22,9 +22,7 @@ void Game::run() {
     for (bool player = false;; player = !player) {
         printTiles();
         getInput(player);
-        if (checkForWin(player)) {
-            break;
-        }
+        if (checkForWin(player)) { break; }
     }
 }
 

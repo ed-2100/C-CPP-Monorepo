@@ -18,9 +18,7 @@ struct TODO {
 
 template <typename T>
 inline T expect(std::optional<T> wrapped, char const* msg) {
-    if (!wrapped) {
-        throw std::runtime_error(msg);
-    }
+    if (!wrapped) { throw std::runtime_error(msg); }
 
     return wrapped.value();
 }

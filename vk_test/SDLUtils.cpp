@@ -43,18 +43,14 @@ SDLWindow::SDLWindow(char const* name, uint32_t w, uint32_t h) {
 }
 
 SDLWindow::~SDLWindow() {
-    if (handle) {
-        SDL_DestroyWindow(handle);
-    }
+    if (handle) { SDL_DestroyWindow(handle); }
 }
 
 SDLSurface::SDLSurface(SDLWindow const& window, vk::Instance instance)
     : Surface(createSurface(window, instance)), instance(instance) {}
 
 SDLSurface::~SDLSurface() {
-    if (surface) {
-        SDL_Vulkan_DestroySurface(vk::Instance(instance), surface, nullptr);
-    }
+    if (surface) { SDL_Vulkan_DestroySurface(vk::Instance(instance), surface, nullptr); }
 }
 
 vk::SurfaceKHR SDLSurface::createSurface(SDLWindow const& window, vk::Instance instance) {

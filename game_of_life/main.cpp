@@ -63,15 +63,11 @@ int main(int /*argc*/, const char** /*argv*/) {
                 size_t sum = 0;
                 for (size_t row = row_min; row <= row_max; row++) {
                     for (size_t col = col_min; col <= col_max; col++) {
-                        if (past_state[row][col]) {
-                            sum++;
-                        }
+                        if (past_state[row][col]) { sum++; }
                     }
                 }
 
-                if (past_state[row][col]) {
-                    sum--;
-                }
+                if (past_state[row][col]) { sum--; }
 
                 const bool result = sum == 3 || (past_state[row][col] && sum == 2);
                 state[row][col] = result;

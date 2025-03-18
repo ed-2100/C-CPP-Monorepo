@@ -99,9 +99,7 @@ vk::Extent2D SwapchainManager::chooseSwapchainExtent(
 
 vk::PresentModeKHR SwapchainManager::choosePresentMode() const {
     auto presentModes = renderer->physicalDevice.getSurfacePresentModesKHR(renderer->surface);
-    if (presentModes.empty()) {
-        throw std::runtime_error("No present modes found!");
-    }
+    if (presentModes.empty()) { throw std::runtime_error("No present modes found!"); }
 
     const std::unordered_map<vk::PresentModeKHR, uint32_t> presentModePreference{
         {vk::PresentModeKHR::eMailbox, 0},
@@ -113,9 +111,7 @@ vk::PresentModeKHR SwapchainManager::choosePresentMode() const {
     uint32_t currentRating = std::numeric_limits<uint32_t>::max();
     for (const auto& availablePresentMode : presentModes) {
         auto candidateKVPairIter = presentModePreference.find(availablePresentMode);
-        if (candidateKVPairIter == presentModePreference.cend()) {
-            continue;
-        }
+        if (candidateKVPairIter == presentModePreference.cend()) { continue; }
 
         uint32_t candidateRating = candidateKVPairIter->second;
         if (candidateRating < currentRating) {
