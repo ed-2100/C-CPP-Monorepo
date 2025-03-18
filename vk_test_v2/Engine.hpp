@@ -8,22 +8,22 @@
 namespace vke {
 
 class VulkanEngine {
-    class VulkanEngineInner {
+    class Inner {
         const SDLContext sdl_context;
         const SDLWindow window;
         const Instance instance;
         const std::optional<DebugUtilsMessengerEXT> debug_messenger;
         const SDLSurface surface;
 
-        VulkanEngineInner(VulkanEngineInner const&) = delete;
-        VulkanEngineInner& operator=(VulkanEngineInner const&) = delete;
+        Inner(Inner const&) = delete;
+        Inner& operator=(Inner const&) = delete;
 
-        VulkanEngineInner(VulkanEngineInner&&) = delete;
-        VulkanEngineInner& operator=(VulkanEngineInner&&) = delete;
+        Inner(Inner&&) = delete;
+        Inner& operator=(Inner&&) = delete;
 
     public:
-        VulkanEngineInner() = delete;
-        inline VulkanEngineInner(
+        Inner() = delete;
+        inline Inner(
             SDLContext sdl_context,
             SDLWindow window,
             Instance instance,
@@ -39,12 +39,12 @@ class VulkanEngine {
         void run();
     };
 
-    std::shared_ptr<VulkanEngineInner> inner;
+    std::shared_ptr<Inner> inner;
 
 public:
     VulkanEngine();
 
-    inline VulkanEngineInner& operator*() const { return *inner; }
+    inline Inner& operator*() const { return *inner; }
 
     inline void run() { return inner->run(); }
 };

@@ -78,7 +78,7 @@ VulkanEngine::VulkanEngine() {
 
     std::cout << physical_devices.size() << std::endl;
 
-    inner = std::make_shared<VulkanEngineInner>(
+    inner = std::make_shared<Inner>(
         sdl_context,
         window,
         instance,
@@ -87,7 +87,7 @@ VulkanEngine::VulkanEngine() {
     );
 }
 
-void VulkanEngine::VulkanEngineInner::run() {
+void VulkanEngine::Inner::run() {
     std::cout << "Running." << std::endl;
 
     std::cout << "Stopped." << std::endl;
