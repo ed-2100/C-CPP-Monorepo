@@ -11,58 +11,58 @@ namespace vke {
 
 // ----- SDLContext -----
 
-class SDLContextInner {
-    SDLContextInner(SDLContextInner const&) = delete;
-    SDLContextInner& operator=(SDLContextInner const&) = delete;
-
-    SDLContextInner(SDLContextInner&&) = delete;
-    SDLContextInner& operator=(SDLContextInner&&) = delete;
-
-public:
-    SDLContextInner();
-    ~SDLContextInner();
-
-    static std::shared_ptr<SDLContextInner> getInstance();
-};
-
 class SDLContext {
-    const std::shared_ptr<SDLContextInner> inner;
+    class Inner {
+        Inner(Inner const&) = delete;
+        Inner& operator=(Inner const&) = delete;
+
+        Inner(Inner&&) = delete;
+        Inner& operator=(Inner&&) = delete;
+
+    public:
+        Inner();
+        ~Inner();
+
+        static std::shared_ptr<Inner> getInstance();
+    };
+
+    const std::shared_ptr<Inner> inner;
 
 public:
-    inline SDLContext() : inner(SDLContextInner::getInstance()) {}
+    inline SDLContext() : inner(Inner::getInstance()) {}
 
     std::span<char const* const> getInstanceExtensions() const;
 };
 
 // ----- SDLWindow -----
 
-class SDLWindowInner {
-    const SDLContext sdl_context;
-    SDL_Window* const handle;
-
-    SDLWindowInner(SDLWindowInner&) = delete;
-    SDLWindowInner& operator=(SDLWindowInner&) = delete;
-
-    SDLWindowInner(SDLWindowInner&&) = delete;
-    SDLWindowInner& operator=(SDLWindowInner&&) = delete;
-
-public:
-    SDLWindowInner() = delete;
-    SDLWindowInner(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h);
-    ~SDLWindowInner();
-
-    inline operator SDL_Window*() const { return handle; }
-
-    VkExtent2D queryExtent() const;
-};
-
 class SDLWindow {
-    const std::shared_ptr<SDLWindowInner> inner;
+    class Inner {
+        const SDLContext sdl_context;
+        SDL_Window* const handle;
+
+        Inner(Inner&) = delete;
+        Inner& operator=(Inner&) = delete;
+
+        Inner(Inner&&) = delete;
+        Inner& operator=(Inner&&) = delete;
+
+    public:
+        Inner() = delete;
+        Inner(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h);
+        ~Inner();
+
+        inline operator SDL_Window*() const { return handle; }
+
+        VkExtent2D queryExtent() const;
+    };
+
+    const std::shared_ptr<Inner> inner;
 
 public:
     SDLWindow() = delete;
     inline SDLWindow(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h)
-        : inner(std::make_shared<SDLWindowInner>(sdl_context, name, w, h)) {}
+        : inner(std::make_shared<Inner>(sdl_context, name, w, h)) {}
 
     inline operator SDL_Window*() const { return *inner; }
 
@@ -71,32 +71,32 @@ public:
 
 // ----- SDLSurface -----
 
-class SDLSurfaceInner {
-    const SDLWindow window;
-    const Instance instance;
-    const VkSurfaceKHR surface;
-
-    SDLSurfaceInner(SDLSurfaceInner&) = delete;
-    SDLSurfaceInner& operator=(SDLSurfaceInner&) = delete;
-
-    SDLSurfaceInner(SDLSurfaceInner&&) = delete;
-    SDLSurfaceInner& operator=(SDLSurfaceInner&&) = delete;
-
-public:
-    SDLSurfaceInner() = delete;
-    SDLSurfaceInner(SDLWindow window, Instance instance);
-    ~SDLSurfaceInner();
-
-    inline operator VkSurfaceKHR() const { return surface; }
-};
-
 class SDLSurface {
-    const std::shared_ptr<SDLSurfaceInner> inner;
+    class Inner {
+        const SDLWindow window;
+        const Instance instance;
+        const VkSurfaceKHR surface;
+
+        Inner(Inner&) = delete;
+        Inner& operator=(Inner&) = delete;
+
+        Inner(Inner&&) = delete;
+        Inner& operator=(Inner&&) = delete;
+
+    public:
+        Inner() = delete;
+        Inner(SDLWindow window, Instance instance);
+        ~Inner();
+
+        inline operator VkSurfaceKHR() const { return surface; }
+    };
+
+    const std::shared_ptr<Inner> inner;
 
 public:
     SDLSurface() = delete;
     inline SDLSurface(SDLWindow window, Instance instance)
-        : inner(std::make_shared<SDLSurfaceInner>(window, instance)) {}
+        : inner(std::make_shared<Inner>(window, instance)) {}
 
     inline operator VkSurfaceKHR() const { return *inner; }
 };

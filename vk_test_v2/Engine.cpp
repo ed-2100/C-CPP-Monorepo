@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include <vulkan/vulkan_core.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -56,6 +57,27 @@ VulkanEngine::VulkanEngine() {
 
     auto surface = SDLSurface(window, instance);
 
+    // clang-format off
+    auto physical_devices = PhysicalDeviceSelector()
+        .with_features_struct(VkPhysicalDeviceVulkan12Features{
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+            .descriptorIndexing = true,
+            .bufferDeviceAddress = true,
+        })
+        .with_features_struct(VkPhysicalDeviceVulkan13Features{
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+            .synchronization2 = true,
+            .dynamicRendering = true,
+        })
+        .select(instance);
+    // clang-format on
+
+    assert(physical_devices.size() > 0);
+
+    // VkPhysicalDevice physical_device = physical_devices[0];
+
+    std::cout << physical_devices.size() << std::endl;
+
     inner = std::make_shared<VulkanEngineInner>(
         sdl_context,
         window,
@@ -65,7 +87,7 @@ VulkanEngine::VulkanEngine() {
     );
 }
 
-void VulkanEngineInner::run() {
+void VulkanEngine::VulkanEngineInner::run() {
     std::cout << "Running." << std::endl;
 
     std::cout << "Stopped." << std::endl;

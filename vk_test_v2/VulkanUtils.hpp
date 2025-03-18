@@ -3,39 +3,52 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
+#include <cstddef>
+#include <cstring>
 #include <memory>
 #include <vector>
 
 namespace vke {
 
-class InstanceInner {
-    const VkInstance instance;
+inline void checkResult(VkResult result) {
+    if (result) {
+        throw std::runtime_error(
+            std::format("Encountered vulkan error: {}", static_cast<int>(result))
+        );
+    }
+}
 
-    InstanceInner(const InstanceInner&) = delete;
-    InstanceInner& operator=(const InstanceInner&) = delete;
-
-    InstanceInner(InstanceInner&&) = delete;
-    InstanceInner& operator=(InstanceInner&&) = delete;
-
-public:
-    InstanceInner() = delete;
-    InstanceInner(const VkInstanceCreateInfo&);
-    ~InstanceInner();
-
-    const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
-    const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
-
-    inline operator VkInstance() const { return instance; }
-};
+// ----- Instance -----
 
 class Instance {
-    const std::shared_ptr<InstanceInner> inner;
+    class Inner {
+        const VkInstance instance;
+
+        Inner(const Inner&) = delete;
+        Inner& operator=(const Inner&) = delete;
+
+        Inner(Inner&&) = delete;
+        Inner& operator=(Inner&&) = delete;
+
+    public:
+        Inner() = delete;
+        Inner(const VkInstanceCreateInfo& create_info);
+        ~Inner();
+
+        const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
+        const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
+
+        inline operator VkInstance() const { return instance; }
+    };
+
+    const std::shared_ptr<Inner> inner;
 
 public:
     Instance() = delete;
-    inline Instance(std::shared_ptr<InstanceInner> inner) : inner(inner) { assert(inner); }
+    inline Instance(const VkInstanceCreateInfo& create_info)
+        : inner(std::make_shared<Inner>(create_info)) {}
 
-    inline InstanceInner* operator->() const { return &(*inner); }
+    inline Inner* operator->() const { return &(*inner); }
 
     inline operator VkInstance() const { return *inner; }
 };
@@ -64,23 +77,22 @@ public:
     }
 };
 
-class DebugUtilsMessengerEXTInner {
-    const Instance instance;
-    const VkDebugUtilsMessengerEXT debug_messenger;
-
-public:
-    DebugUtilsMessengerEXTInner() = delete;
-    DebugUtilsMessengerEXTInner(
-        Instance instance,
-        const VkDebugUtilsMessengerCreateInfoEXT& create_info
-    );
-    ~DebugUtilsMessengerEXTInner();
-
-    inline operator VkDebugUtilsMessengerEXT() const { return debug_messenger; }
-};
+// ----- DebugUtilsMessengerEXT -----
 
 class DebugUtilsMessengerEXT {
-    const std::shared_ptr<DebugUtilsMessengerEXTInner> inner;
+    class Inner {
+        const Instance instance;
+        const VkDebugUtilsMessengerEXT debug_messenger;
+
+    public:
+        Inner() = delete;
+        Inner(Instance instance, const VkDebugUtilsMessengerCreateInfoEXT& create_info);
+        ~Inner();
+
+        inline operator VkDebugUtilsMessengerEXT() const { return debug_messenger; }
+    };
+
+    const std::shared_ptr<Inner> inner;
 
 public:
     DebugUtilsMessengerEXT() = delete;
@@ -88,9 +100,55 @@ public:
         Instance instance,
         const VkDebugUtilsMessengerCreateInfoEXT& create_info
     )
-        : inner(std::make_shared<DebugUtilsMessengerEXTInner>(instance, create_info)) {}
+        : inner(std::make_shared<Inner>(instance, create_info)) {}
 
     inline operator VkDebugUtilsMessengerEXT() const { return *inner; }
+};
+
+// ----- PhysicalDeviceSelector -----
+
+/// WARNING: This contains delicate code!
+class PhysicalDeviceSelector {
+    struct Node {
+        std::byte* user;
+        std::byte* api;
+        size_t size;
+        Node* next;
+
+        Node(size_t size) : size(size), next(nullptr) {
+            user = new std::byte[size];
+            api = new std::byte[size];
+        }
+
+        ~Node() {
+            delete[] user;
+            delete[] api;
+        }
+    };
+
+    Node* head = nullptr;
+    VkPhysicalDeviceFeatures2 features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+
+    bool with_features_struct_inner(std::byte* to_add, size_t size);
+    bool is_suitable(VkPhysicalDevice physical_device) const;
+
+public:
+    ~PhysicalDeviceSelector();
+
+    template <typename T>
+    inline PhysicalDeviceSelector& with_features_struct(const T& to_add) {
+        with_features_struct_inner((std::byte*)&to_add, sizeof(to_add));
+        return *this;
+    }
+
+    template <>
+    inline PhysicalDeviceSelector& with_features_struct(const VkPhysicalDeviceFeatures2& to_add) {
+        assert(to_add.sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2);
+        memcpy((std::byte*)&features + 16, &to_add, sizeof(features));
+        return *this;
+    }
+
+    std::vector<VkPhysicalDevice> select(VkInstance instance) const;
 };
 
 }  // namespace vke

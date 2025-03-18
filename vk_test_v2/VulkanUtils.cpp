@@ -1,20 +1,14 @@
 #include "VulkanUtils.hpp"
-#include <vulkan/vulkan_core.h>
-#include <iostream>
 
-static void checkResult(VkResult result) {
-    if (result) {
-        throw std::runtime_error(
-            std::format("Encountered vulkan error: {}", static_cast<int>(result))
-        );
-    }
-}
+#include <vulkan/vulkan_core.h>
+#include <cstring>
+#include <ranges>
 
 namespace vke {
 
 // ----- Instance -----
 
-InstanceInner::InstanceInner(const VkInstanceCreateInfo& create_info)
+Instance::Inner::Inner(const VkInstanceCreateInfo& create_info)
     : instance([&create_info]() {
           VkInstance instance;
           checkResult(vkCreateInstance(&create_info, nullptr, &instance));
@@ -26,7 +20,7 @@ InstanceInner::InstanceInner(const VkInstanceCreateInfo& create_info)
       vkDestroyDebugUtilsMessengerEXT((PFN_vkDestroyDebugUtilsMessengerEXT
       )vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT")) {}
 
-InstanceInner::~InstanceInner() {
+Instance::Inner::~Inner() {
     vkDestroyInstance(instance, nullptr);
 }
 
@@ -50,7 +44,7 @@ Instance InstanceBuilder::build() {
         .ppEnabledExtensionNames = extensions.data(),
     };
 
-    return std::make_shared<InstanceInner>(create_info);
+    return Instance(create_info);
 }
 
 InstanceBuilder& InstanceBuilder::with_validation_layers() {
@@ -74,7 +68,9 @@ InstanceBuilder& InstanceBuilder::with_layers(std::span<const char* const> layer
     return *this;
 }
 
-DebugUtilsMessengerEXTInner::DebugUtilsMessengerEXTInner(
+// ----- DebugUtilsMessengerEXT -----
+
+DebugUtilsMessengerEXT::Inner::Inner(
     Instance instance,
     const VkDebugUtilsMessengerCreateInfoEXT& create_info
 )
@@ -95,8 +91,92 @@ DebugUtilsMessengerEXTInner::DebugUtilsMessengerEXTInner(
           return debug_messenger;
       }()) {}
 
-DebugUtilsMessengerEXTInner::~DebugUtilsMessengerEXTInner() {
+DebugUtilsMessengerEXT::Inner::~Inner() {
     instance->vkDestroyDebugUtilsMessengerEXT(instance, debug_messenger, nullptr);
+}
+
+// ----- PhysicalDeviceSelector -----
+
+PhysicalDeviceSelector::~PhysicalDeviceSelector() {
+    while (head) {
+        Node* next = head->next;
+        delete head;
+        head = next;
+    }
+}
+
+bool PhysicalDeviceSelector::with_features_struct_inner(std::byte* to_add, size_t size) {
+    Node* next = head;
+
+    while (next) {
+        if (*(VkStructureType*)(next->user) == *(VkStructureType*)to_add) {
+            memcpy(next->user + 16, &to_add, size - 16);
+            return true;
+        }
+
+        next = next->next;
+    }
+
+    Node* newNode = new Node(size);
+    memcpy(newNode->user, to_add, size);
+    *(VkStructureType*)(newNode->api) = *(VkStructureType*)to_add;
+
+    if (!head) {
+        *(void**)(newNode->user + 8) = nullptr;
+        *(void**)(newNode->api + 8) = nullptr;
+        head = newNode;
+    } else {
+        *(void**)(newNode->user + 8) = head->user;
+        *(void**)(newNode->api + 8) = head->api;
+        newNode->next = head;
+        head = newNode;
+    }
+
+    return false;
+}
+
+bool PhysicalDeviceSelector::is_suitable(VkPhysicalDevice physical_device) const {
+    Node node = Node(sizeof(features));
+    memcpy(node.user, &features, node.size);
+    *(VkStructureType*)node.api = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    *(void**)(node.api + 8) = *(void**)(head->api + 8);
+    node.next = head;
+
+    vkGetPhysicalDeviceFeatures2(physical_device, (VkPhysicalDeviceFeatures2*)node.api);
+
+    Node* next = &node;
+
+    while (next) {
+        for (size_t i = 16; i < next->size; i += sizeof(VkBool32)) {
+            VkBool32 feature = *(VkBool32*)(next->user + i);
+            if (feature) {
+                VkBool32 api_feature = *(VkBool32*)(next->api + i);
+                if (!api_feature) return false;
+            }
+        }
+
+        next = next->next;
+    }
+
+    return true;
+}
+
+std::vector<VkPhysicalDevice> PhysicalDeviceSelector::select(VkInstance instance) const {
+    uint32_t physical_device_count;
+    checkResult(vkEnumeratePhysicalDevices(instance, &physical_device_count, nullptr));
+
+    std::vector<VkPhysicalDevice> physical_devices(physical_device_count);
+    checkResult(
+        vkEnumeratePhysicalDevices(instance, &physical_device_count, physical_devices.data())
+    );
+
+    std::vector<VkPhysicalDevice> suitable_physical_devices =
+        physical_devices | std::ranges::views::filter([this](auto dev) {
+            return is_suitable(dev);
+        }) |
+        std::ranges::to<std::vector<VkPhysicalDevice>>();
+
+    return suitable_physical_devices;
 }
 
 }  // namespace vke

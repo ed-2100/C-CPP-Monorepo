@@ -14,7 +14,7 @@ namespace vke {
 
 static bool sdl_initialized = false;
 
-SDLContextInner::SDLContextInner() {
+SDLContext::Inner::Inner() {
     assert(!sdl_initialized);
     sdl_initialized = true;
 
@@ -23,20 +23,20 @@ SDLContextInner::SDLContextInner() {
     }
 }
 
-SDLContextInner::~SDLContextInner() {
+SDLContext::Inner::~Inner() {
     SDL_Quit();
 
     sdl_initialized = false;
 }
 
-std::shared_ptr<SDLContextInner> SDLContextInner::getInstance() {
-    static std::weak_ptr<SDLContextInner> weakInstance;
+std::shared_ptr<SDLContext::Inner> SDLContext::Inner::getInstance() {
+    static std::weak_ptr<Inner> weakInstance;
     static std::mutex mutex;
 
     std::lock_guard<std::mutex> lock(mutex);
     auto sharedInstance = weakInstance.lock();
     if (!sharedInstance) {
-        sharedInstance = std::make_shared<SDLContextInner>();
+        sharedInstance = std::make_shared<Inner>();
         weakInstance = sharedInstance;
     }
 
@@ -56,7 +56,7 @@ std::span<char const* const> SDLContext::getInstanceExtensions() const {
 
 // ----- SDLWindow -----
 
-SDLWindowInner::SDLWindowInner(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h)
+SDLWindow::Inner::Inner(SDLContext sdl_context, char const* name, uint32_t w, uint32_t h)
     : sdl_context(sdl_context), handle([&name, &w, &h]() {
           SDL_Window* handle = SDL_CreateWindow(name, w, h, SDL_WINDOW_VULKAN);
           if (!handle) {
@@ -67,13 +67,13 @@ SDLWindowInner::SDLWindowInner(SDLContext sdl_context, char const* name, uint32_
           return handle;
       }()) {}
 
-SDLWindowInner::~SDLWindowInner() {
+SDLWindow::Inner::~Inner() {
     // SAFETY: handle is guaranteed to not be null, because
     //         the class is not copyable or movable.
     SDL_DestroyWindow(handle);
 }
 
-VkExtent2D SDLWindowInner::queryExtent() const {
+VkExtent2D SDLWindow::Inner::queryExtent() const {
     int width, height;
     if (!SDL_GetWindowSize(handle, &width, &height)) {
         throw std::runtime_error(std::format("Failed to get query extent: {}", SDL_GetError()));
@@ -87,7 +87,7 @@ VkExtent2D SDLWindowInner::queryExtent() const {
 
 // ----- SDLSurface -----
 
-SDLSurfaceInner::SDLSurfaceInner(SDLWindow window, Instance instance)
+SDLSurface::Inner::Inner(SDLWindow window, Instance instance)
     : window(window), instance(instance), surface([&window, &instance]() {
           VkSurfaceKHR surface;
           if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {
@@ -96,7 +96,7 @@ SDLSurfaceInner::SDLSurfaceInner(SDLWindow window, Instance instance)
           return surface;
       }()) {}
 
-SDLSurfaceInner::~SDLSurfaceInner() {
+SDLSurface::Inner::~Inner() {
     // SAFETY: surface is guaranteed to not be null, because
     //         the class is not copyable or movable.
     SDL_Vulkan_DestroySurface(instance, surface, nullptr);
